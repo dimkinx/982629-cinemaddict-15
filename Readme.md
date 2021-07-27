@@ -1,7 +1,7 @@
 # Проект «Киноман»
 
 * Студент: [Dmitry Ostroukhov](https://up.htmlacademy.ru/ecmascript/15/user/982629).
-* Наставник: `Неизвестно`.
+* Наставник: [Даниил Царёв](https://up.htmlacademy.ru/ecmascript/15/user/945835).
 
 ---
 
