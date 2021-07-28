@@ -1,46 +1,45 @@
 import {createProfileTemplate} from './view/profile.js';
 import {createMenuTemplate} from './view/menu.js';
 import {createFilmsSectionTemplate} from './view/films-section.js';
+import {createFilmsListExtraTemplate} from './view/films-list-extra.js';
 import {createFilmCardTemplate} from './view/film-card.js';
 import {createShowMoreButtonTemplate} from './view/show-more-button.js';
 import {createStatisticsTemplate} from './view/statistics.js';
 import {createFilmDetailsTemplate} from './view/film-details.js';
 
-const FILMS_NUM = 5;
-const FILMS_EXTRA_NUM = 2;
+const FILMS_COUNT = 5;
+const FILMS_EXTRA_COUNT = 2;
+const FILMS_LIST_EXTRA_COUNT = 2;
 
-const render = (container, place, template) => {
-  container.insertAdjacentHTML(place, template);
-};
-
-const renderFilmsListTemplate = (containers) => {
-  containers.forEach((container) => {
-    if (container.parentElement.matches('.films-list--extra')) {
-      render(container, 'afterbegin', createFilmCardTemplate().repeat(FILMS_EXTRA_NUM));
-    } else {
-      render(container, 'afterbegin', createFilmCardTemplate().repeat(FILMS_NUM));
-      render(container.parentElement, 'beforeend', createShowMoreButtonTemplate());
-    }
-  });
+const RenderPlace = {
+  BEFORE_END: 'beforeend',
+  AFTER_END: 'afterend',
 };
 
 const headerElement = document.querySelector('.header');
-
-render(headerElement, 'beforeend', createProfileTemplate());
-
 const mainElement = document.querySelector('.main');
-
-render(mainElement, 'afterbegin', createMenuTemplate());
-render(mainElement, 'beforeend', createFilmsSectionTemplate());
-
-const filmsListContainerElements = mainElement.querySelectorAll('.films-list__container');
-
-renderFilmsListTemplate(filmsListContainerElements);
-
 const footerElement = document.querySelector('.footer');
-
-render(footerElement, 'afterend', createFilmDetailsTemplate());
-
 const statisticsSectionElement = footerElement.querySelector('.footer__statistics');
 
-render(statisticsSectionElement, 'afterbegin', createStatisticsTemplate());
+const render = (container, template, place = RenderPlace.BEFORE_END) => container.insertAdjacentHTML(place, template);
+
+render(headerElement, createProfileTemplate());
+render(mainElement, createMenuTemplate());
+render(mainElement, createFilmsSectionTemplate());
+
+const filmsSectionElement = mainElement.querySelector('.films');
+const filmsListContainerElement = filmsSectionElement.querySelector('.films-list__container');
+
+render(filmsListContainerElement, createFilmCardTemplate().repeat(FILMS_COUNT));
+render(filmsListContainerElement, createShowMoreButtonTemplate(), RenderPlace.AFTER_END);
+render(filmsSectionElement, createFilmsListExtraTemplate().repeat(FILMS_LIST_EXTRA_COUNT));
+
+const filmsListExtraElements = filmsSectionElement.querySelectorAll('.films-list--extra');
+
+filmsListExtraElements.forEach((container) => {
+  const containerElement = container.querySelector('.films-list__container');
+  render(containerElement, createFilmCardTemplate().repeat(FILMS_EXTRA_COUNT));
+});
+
+render(statisticsSectionElement, createStatisticsTemplate());
+render(footerElement, createFilmDetailsTemplate(), RenderPlace.AFTER_END);
