@@ -10,5 +10,7 @@ module.exports = {
   devServer: {
     contentBase: path.resolve(__dirname, 'public'),
     watchContentBase: true,
+    port: 3000,
+    host: '10.10.10.100',
   },
 };
