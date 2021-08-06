@@ -1,16 +1,10 @@
-import {generateNavigation} from '../mock/menu.js';
-import {capitalizeFirstLetter} from '../utils/utils.js';
-
-const createNavigationItemTemplate = ({name, count}) => (
-  `<a href="#${name}" class="main-navigation__item ${(name === 'all') && 'main-navigation__item--active'}">
-    ${capitalizeFirstLetter(name)} ${(name === 'all') ? 'movies' : `<span class="main-navigation__item-count">${count}</span>`}
-  </a>`
-);
-
-export const createMenuTemplate = (filmsData) => (
+export const createMenuTemplate = (films) => (
   `<nav class="main-navigation">
     <div class="main-navigation__items">
-      ${generateNavigation(filmsData).map((filmData) => createNavigationItemTemplate(filmData)).join('\n')}
+      <a href="#all" class="main-navigation__item main-navigation__item--active">All movies</a>
+      <a href="#watchlist" class="main-navigation__item">Watchlist <span class="main-navigation__item-count">${films.filter((film) => film.userDetails.watchlist).length}</span></a>
+      <a href="#history" class="main-navigation__item">History <span class="main-navigation__item-count">${films.filter((film) => film.userDetails.alreadyWatched).length}</span></a>
+      <a href="#favorites" class="main-navigation__item">Favorites <span class="main-navigation__item-count">${films.filter((film) => film.userDetails.favorite).length}</span></a>
     </div>
     <a href="#stats" class="main-navigation__additional">Stats</a>
   </nav>

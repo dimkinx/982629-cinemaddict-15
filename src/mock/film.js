@@ -1,5 +1,5 @@
-import {getRandomInteger, getRandomFloat, shuffleItems, getRandomItem} from '../utils/utils.js';
-import {generateDate} from '../utils/dayjs-helper.js';
+import {getRandomNumber, shuffleItems, getRandomItem} from '../utils/utils';
+import dayjs from 'dayjs';
 
 const TITLES = [
   'The Dance of Life',
@@ -101,30 +101,38 @@ const DESCRIPTIONS = [
 
 let idComment = 0;
 
+export const generateDate = (year, day) => dayjs()
+  .subtract(getRandomNumber(0, year), 'year')
+  .subtract(getRandomNumber(0, day), 'day')
+  .subtract(getRandomNumber(0, 23), 'hour')
+  .subtract(getRandomNumber(0, 59), 'minute')
+  .subtract(getRandomNumber(0, 59), 'second')
+  .toISOString();
+
 export const generateFilm = (id) => ({
   id: String(id),
-  comments: new Array(getRandomInteger(0, 5)).fill(null).map(() => idComment++),
+  comments: new Array(getRandomNumber(0, 5)).fill(null).map(() => idComment++),
   filmInfo: {
     title: getRandomItem(TITLES),
     alternativeTitle: getRandomItem(TITLES),
-    totalRating: getRandomFloat(),
+    totalRating: getRandomNumber(1, 10, 1),
     poster: `images/posters/${getRandomItem(POSTERS)}`,
     ageRating: getRandomItem(AGE_RATINGS),
     director: getRandomItem(DIRECTORS),
-    writers: shuffleItems(WRITERS).slice(0, getRandomInteger(1, 2)),
-    actors: shuffleItems(ACTORS).slice(0, getRandomInteger(3, 5)),
+    writers: shuffleItems(WRITERS).slice(0, getRandomNumber(1, 2)),
+    actors: shuffleItems(ACTORS).slice(0, getRandomNumber(3, 5)),
     release: {
       date: generateDate(70, 30),
       releaseCountry: getRandomItem(RELEASE_COUNTRIES),
     },
-    runtime: getRandomInteger(20, 250),
-    genre: shuffleItems(GENRES).slice(0, getRandomInteger(1, 3)),
-    description: shuffleItems(DESCRIPTIONS).slice(0, getRandomInteger(1, 5)).join(' '),
+    runtime: getRandomNumber(20, 250),
+    genre: shuffleItems(GENRES).slice(0, getRandomNumber(1, 3)),
+    description: shuffleItems(DESCRIPTIONS).slice(0, getRandomNumber(1, 5)).join(' '),
   },
   userDetails: {
-    watchlist: Boolean(getRandomInteger(0, 1)),
-    alreadyWatched: Boolean(getRandomInteger(0, 1)),
+    watchlist: Boolean(getRandomNumber(0, 1)),
+    alreadyWatched: Boolean(getRandomNumber(0, 1)),
     watchingDate: generateDate(0, 30),
-    favorite: Boolean(getRandomInteger(0, 1)),
+    favorite: Boolean(getRandomNumber(0, 1)),
   },
 });

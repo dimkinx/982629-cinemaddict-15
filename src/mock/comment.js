@@ -1,5 +1,5 @@
-import {getRandomItem} from '../utils/utils.js';
-import {generateDate} from '../utils/dayjs-helper.js';
+import {getRandomItem} from '../utils/utils';
+import {generateDate} from './film';
 
 const AUTHORS = [
   'Malcolm "Mal" Reynolds',
