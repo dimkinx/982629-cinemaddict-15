@@ -119,7 +119,7 @@ const renderFilmsExtraSection = ({sortName, sortedFilms}) => {
     const containerElement = filmsExtraComponent.getElement().querySelector('.films-list__container');
 
     render(filmsSectionElement, filmsExtraComponent.getElement());
-    sortedFilms.map((sortedFilm) => render(containerElement, new FilmCardView(sortedFilm).getElement()));
+    sortedFilms.map((sortedFilm) => renderFilm(containerElement, sortedFilm, comments[sortedFilm.id]));
   }
 };
 
