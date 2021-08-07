@@ -1,4 +1,6 @@
-export const createFilmsSectionTemplate = () => (
+import {createElement} from '../utils/dom-utils';
+
+const createFilmsSectionTemplate = () => (
   `<section class="films">
     <section class="films-list">
       <h2 class="films-list__title visually-hidden">All movies. Upcoming</h2>
@@ -7,3 +9,25 @@ export const createFilmsSectionTemplate = () => (
     </section>
   </section>`
 );
+
+export default class FilmsSectionView {
+  constructor() {
+    this._element = null;
+  }
+
+  getTemplate() {
+    return createFilmsSectionTemplate();
+  }
+
+  getElement() {
+    if (!this._element) {
+      this._element = createElement(this.getTemplate());
+    }
+
+    return this._element;
+  }
+
+  removeElement() {
+    this._element = null;
+  }
+}

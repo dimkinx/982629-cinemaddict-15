@@ -1,28 +1,31 @@
-const ratingToRangeViewsCount = {
-  'novice': {
-    min: 1,
-    max: 10,
-  },
-  'fan': {
-    min: 11,
-    max: 20,
-  },
-  'movie buff': {
-    min: 21,
-    max: Infinity,
-  },
-};
+import {createElement} from '../utils/dom-utils';
 
-export const createProfileTemplate = (films) => {
-  const viewsCount = films.filter((film) => film.userDetails.alreadyWatched).length;
-  let rank = '';
+const createProfileTemplate = (rank) => (
+  `<section class="header__profile profile">
+    ${(rank) && `<p class="profile__rating">${rank}</p>`}
+    <img class="profile__avatar" src="images/bitmap@2x.png" alt="Avatar" width="35" height="35">
+  </section>`
+);
 
-  Object.entries(ratingToRangeViewsCount).forEach(([key, value]) => (viewsCount >= value.min && viewsCount <= value.max) && (rank = key));
+export default class ProfileView {
+  constructor(rank) {
+    this._rank = rank;
+    this._element = null;
+  }
 
-  return (
-    `<section class="header__profile profile">
-      ${(rank) && `<p class="profile__rating">${rank}</p>`}
-      <img class="profile__avatar" src="images/bitmap@2x.png" alt="Avatar" width="35" height="35">
-    </section>`
-  );
-};
+  getTemplate() {
+    return createProfileTemplate(this._rank);
+  }
+
+  getElement() {
+    if (!this._element) {
+      this._element = createElement(this.getTemplate());
+    }
+
+    return this._element;
+  }
+
+  removeElement() {
+    this._element = null;
+  }
+}

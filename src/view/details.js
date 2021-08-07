@@ -1,5 +1,5 @@
-import {getFormattedDuration} from '../utils/utils';
-import {getFormattedCommentDate, getFormattedDate, sortByDate} from '../utils/date-time-utils';
+import {getFormattedCommentDate, getFormattedDate, sortByDate, getFormattedDuration} from '../utils/date-time-utils';
+import {createElement} from '../utils/dom-utils';
 
 const createCommentTemplate = (comment) => (
   `<li class="film-details__comment">
@@ -17,7 +17,7 @@ const createCommentTemplate = (comment) => (
   </li>`
 );
 
-export const createFilmDetailsTemplate = (film, comments) => (
+const createFilmDetailsTemplate = (film, comments) => (
   `<section class="film-details">
     <form class="film-details__inner" action="" method="get">
       <div class="film-details__top-container">
@@ -129,3 +129,27 @@ export const createFilmDetailsTemplate = (film, comments) => (
     </form>
   </section>`
 );
+
+export default class FilmDetailsView {
+  constructor(film, comments) {
+    this._film = film;
+    this._comments = comments;
+    this._element = null;
+  }
+
+  getTemplate() {
+    return createFilmDetailsTemplate(this._film, this._comments);
+  }
+
+  getElement() {
+    if (!this._element) {
+      this._element = createElement(this.getTemplate());
+    }
+
+    return this._element;
+  }
+
+  removeElement() {
+    this._element = null;
+  }
+}

@@ -1,4 +1,4 @@
-import {getRandomNumber, shuffleItems, getRandomItem} from '../utils/utils';
+import {getRandomNumber, shuffleItems, getRandomItem} from '../utils/mock-utils';
 import dayjs from 'dayjs';
 
 const TITLES = [

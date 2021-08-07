@@ -1,39 +1,32 @@
-import {createFilmCardTemplate} from './film';
+import {createElement} from '../utils/dom-utils';
 
-const FILMS_EXTRA_COUNT = 2;
+const createFilmsExtraTemplate = (title) => (
+  `<section class="films-list films-list--extra">
+    <h2 class="films-list__title">${title}</h2>
 
-const sortNameToSortFilms = {
-  'Top rated': (films) => films
-    .slice()
-    .sort((first, second) => second.filmInfo.totalRating - first.filmInfo.totalRating),
-  'Most commented': (films) => films
-    .filter((filmData) => filmData.comments.length > 0)
-    .sort((firstFilm, secondFilm) => secondFilm.comments.length - firstFilm.comments.length),
-};
-
-const generateFilmsExtra = (films) => Object.entries(sortNameToSortFilms).map(
-  ([sortName, sortFilms]) => ({
-    sortName,
-    sortedFilms: sortFilms(films),
-  }),
+    <div class="films-list__container"></div>
+  </section>`
 );
 
-const createFilmsExtraTemplate = ({sortName, sortedFilms}) => {
-  if (sortedFilms.length === 0) {
-    return '';
+export default class FilmsExtraView {
+  constructor(title) {
+    this._title = title;
+    this._element = null;
   }
 
-  return (
-    `<section class="films-list films-list--extra">
-      <h2 class="films-list__title">${sortName}</h2>
+  getTemplate() {
+    return createFilmsExtraTemplate(this._title);
+  }
 
-      <div class="films-list__container">
-        ${sortedFilms.slice(0, FILMS_EXTRA_COUNT).map((film) => createFilmCardTemplate(film)).join('\n')}
-      </div>
-    </section>`
-  );
-};
+  getElement() {
+    if (!this._element) {
+      this._element = createElement(this.getTemplate());
+    }
 
-export const createFilmsExtraTemplates = (films) => generateFilmsExtra(films)
-  .map((sortNameToSortedFilms) => createFilmsExtraTemplate(sortNameToSortedFilms))
-  .join('\n');
+    return this._element;
+  }
+
+  removeElement() {
+    this._element = null;
+  }
+}

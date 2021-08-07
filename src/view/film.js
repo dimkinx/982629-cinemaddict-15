@@ -1,5 +1,5 @@
-import {getFormattedDuration} from '../utils/utils';
-import {getFormattedDate} from '../utils/date-time-utils';
+import {getFormattedDate, getFormattedDuration} from '../utils/date-time-utils';
+import {createElement} from '../utils/dom-utils';
 
 const MAX_LENGTH_DESCRIPTION = 140;
 
@@ -7,7 +7,7 @@ const trimText = (text, length = MAX_LENGTH_DESCRIPTION) => (text.length > lengt
   ? text.slice(0, length - 1).concat('…')
   : text;
 
-export const createFilmCardTemplate = (film) => (
+const createFilmCardTemplate = (film) => (
   `<article class="film-card">
     <h3 class="film-card__title">${film.filmInfo.title}</h3>
     <p class="film-card__rating">${film.filmInfo.totalRating}</p>
@@ -26,3 +26,26 @@ export const createFilmCardTemplate = (film) => (
     </div>
   </article>`
 );
+
+export default class FilmCardView {
+  constructor(film) {
+    this._film = film;
+    this._element = null;
+  }
+
+  getTemplate() {
+    return createFilmCardTemplate(this._film);
+  }
+
+  getElement() {
+    if (!this._element) {
+      this._element = createElement(this.getTemplate());
+    }
+
+    return this._element;
+  }
+
+  removeElement() {
+    this._element = null;
+  }
+}
