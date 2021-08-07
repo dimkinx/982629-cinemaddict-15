@@ -65,9 +65,34 @@ render(mainElement, new FilmsSectionView().getElement());
 const filmsSectionElement = mainElement.querySelector('.films');
 const filmsListContainerElement = filmsSectionElement.querySelector('.films-list__container');
 
+const renderFilm = (filmsListElement, filmData, filmCommentsData) => {
+  const filmCardComponent = new FilmCardView(filmData);
+  const filmDetailsComponent = new FilmDetailsView(filmData, filmCommentsData);
+
+  const filmCardClickHandler = (evt) => {
+    evt.preventDefault();
+    document.body.classList.add('hide-overflow');
+    document.body.appendChild(filmDetailsComponent.getElement());
+  };
+
+  filmCardComponent.getElement().querySelector('.film-card__title').addEventListener('click', filmCardClickHandler);
+  filmCardComponent.getElement().querySelector('.film-card__poster').addEventListener('click', filmCardClickHandler);
+  filmCardComponent.getElement().querySelector('.film-card__comments').addEventListener('click', filmCardClickHandler);
+
+  const detailsCloseBtnClickHandler = (evt) => {
+    evt.preventDefault();
+    document.body.classList.remove('hide-overflow');
+    document.body.removeChild(filmDetailsComponent.getElement());
+  };
+
+  filmDetailsComponent.getElement().querySelector('.film-details__close-btn').addEventListener('click', detailsCloseBtnClickHandler);
+
+  render(filmsListElement, filmCardComponent.getElement());
+};
+
 const renderFilmsBatch = () => tempFilms
   .splice(0, FILMS_COUNT_PER_STEP)
-  .map((tempFilm) => render(filmsListContainerElement, new FilmCardView(tempFilm).getElement()));
+  .map((tempFilm) => renderFilm(filmsListContainerElement, tempFilm, comments[tempFilm.id]));
 
 renderFilmsBatch();
 render(filmsListContainerElement, new ShowMoreButtonView().getElement(), RenderPlace.AFTER_END);
@@ -104,4 +129,3 @@ const renderFilmsExtraSections = (filmsData) => generateFilmsExtra(filmsData)
 renderFilmsExtraSections(films);
 
 render(statisticsSectionElement, new StatisticsView(films).getElement());
-render(footerElement, new FilmDetailsView(films[0], comments[0]).getElement(), RenderPlace.AFTER_END);
