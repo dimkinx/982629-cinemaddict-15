@@ -8,7 +8,7 @@ import StatisticsView from './view/statistics-view';
 import FilmDetailsView from './view/film-details-view';
 import {generateFilm} from './mock/film';
 import {generateComment} from './mock/comment';
-import {RenderPlace, render} from './utils/dom-utils';
+import {RenderPlace, render, isEscEvent} from './utils/dom-utils';
 
 const FILMS_COUNT = 17;
 const FILMS_COUNT_PER_STEP = 5;
@@ -69,18 +69,26 @@ const renderFilm = (filmsListElement, filmData, filmCommentsData) => {
   const filmComponent = new FilmView(filmData);
   const filmDetailsComponent = new FilmDetailsView(filmData, filmCommentsData);
 
-  const openFilmDetailsClickHandler = () => {
-    document.body.classList.add('hide-overflow');
-    document.body.appendChild(filmDetailsComponent.getElement());
-  };
-
-  filmComponent.setOpenFilmDetailsClickHandler(openFilmDetailsClickHandler);
-
   const closeFilmDetailsClickHandler = () => {
     document.body.classList.remove('hide-overflow');
     document.body.removeChild(filmDetailsComponent.getElement());
   };
 
+  const escKeyDownHandler = (evt) => {
+    if (isEscEvent(evt)) {
+      evt.preventDefault();
+      closeFilmDetailsClickHandler();
+      document.removeEventListener('keydown', escKeyDownHandler);
+    }
+  };
+
+  const openFilmDetailsClickHandler = () => {
+    document.addEventListener('keydown', escKeyDownHandler);
+    document.body.classList.add('hide-overflow');
+    document.body.appendChild(filmDetailsComponent.getElement());
+  };
+
+  filmComponent.setOpenFilmDetailsClickHandler(openFilmDetailsClickHandler);
   filmDetailsComponent.setCloseFilmDetailsClickHandler(closeFilmDetailsClickHandler);
 
   render(filmsListElement, filmComponent.getElement());
