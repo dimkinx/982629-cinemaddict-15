@@ -31,6 +31,8 @@ export default class FilmView {
   constructor(film) {
     this._film = film;
     this._element = null;
+    this._callback = {};
+    this._openFilmDetailsClickHandler = this._openFilmDetailsClickHandler.bind(this);
   }
 
   getTemplate() {
@@ -47,5 +49,17 @@ export default class FilmView {
 
   removeElement() {
     this._element = null;
+  }
+
+  _openFilmDetailsClickHandler(evt) {
+    evt.preventDefault();
+    this._callback.openFilmDetailsClick();
+  }
+
+  setOpenFilmDetailsClickHandler(callback) {
+    this._callback.openFilmDetailsClick = callback;
+    this.getElement().querySelector('.film-card__title').addEventListener('click', this._openFilmDetailsClickHandler);
+    this.getElement().querySelector('.film-card__poster').addEventListener('click', this._openFilmDetailsClickHandler);
+    this.getElement().querySelector('.film-card__comments').addEventListener('click', this._openFilmDetailsClickHandler);
   }
 }

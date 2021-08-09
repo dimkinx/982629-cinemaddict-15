@@ -66,28 +66,24 @@ const filmsSectionElement = mainElement.querySelector('.films');
 const filmsListContainerElement = filmsSectionElement.querySelector('.films-list__container');
 
 const renderFilm = (filmsListElement, filmData, filmCommentsData) => {
-  const filmCardComponent = new FilmView(filmData);
+  const filmComponent = new FilmView(filmData);
   const filmDetailsComponent = new FilmDetailsView(filmData, filmCommentsData);
 
-  const filmCardClickHandler = (evt) => {
-    evt.preventDefault();
+  const openFilmDetailsClickHandler = () => {
     document.body.classList.add('hide-overflow');
     document.body.appendChild(filmDetailsComponent.getElement());
   };
 
-  filmCardComponent.getElement().querySelector('.film-card__title').addEventListener('click', filmCardClickHandler);
-  filmCardComponent.getElement().querySelector('.film-card__poster').addEventListener('click', filmCardClickHandler);
-  filmCardComponent.getElement().querySelector('.film-card__comments').addEventListener('click', filmCardClickHandler);
+  filmComponent.setOpenFilmDetailsClickHandler(openFilmDetailsClickHandler);
 
-  const detailsCloseBtnClickHandler = (evt) => {
-    evt.preventDefault();
+  const closeFilmDetailsClickHandler = () => {
     document.body.classList.remove('hide-overflow');
     document.body.removeChild(filmDetailsComponent.getElement());
   };
 
-  filmDetailsComponent.getElement().querySelector('.film-details__close-btn').addEventListener('click', detailsCloseBtnClickHandler);
+  filmDetailsComponent.setCloseFilmDetailsClickHandler(closeFilmDetailsClickHandler);
 
-  render(filmsListElement, filmCardComponent.getElement());
+  render(filmsListElement, filmComponent.getElement());
 };
 
 const renderFilmsBatch = () => tempFilms
