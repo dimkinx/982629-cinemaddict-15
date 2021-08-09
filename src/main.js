@@ -60,7 +60,7 @@ const getProfileRank = (filmsData) => {
 
 render(headerElement, new ProfileView(getProfileRank(films)).getElement());
 render(mainElement, new MenuView(films).getElement());
-render(mainElement, new FilmsView().getElement());
+render(mainElement, new FilmsView(films.length).getElement());
 
 const filmsSectionElement = mainElement.querySelector('.films');
 const filmsListContainerElement = filmsSectionElement.querySelector('.films-list__container');
@@ -99,19 +99,22 @@ const renderFilmsBatch = () => tempFilms
   .map((tempFilm) => renderFilm(filmsListContainerElement, tempFilm, comments[tempFilm.id]));
 
 renderFilmsBatch();
-render(filmsListContainerElement, new FilmsShowButtonView().getElement(), RenderPlace.AFTER_END);
 
-const showMoreButtonElement = filmsSectionElement.querySelector('.films-list__show-more');
+if (films.length) {
+  render(filmsListContainerElement, new FilmsShowButtonView().getElement(), RenderPlace.AFTER_END);
 
-const showMoreButtonClickHandler = () => {
-  if (tempFilms.length <= FILMS_COUNT_PER_STEP) {
-    showMoreButtonElement.remove();
-  }
+  const showMoreButtonElement = filmsSectionElement.querySelector('.films-list__show-more');
 
-  renderFilmsBatch();
-};
+  const showMoreButtonClickHandler = () => {
+    if (tempFilms.length <= FILMS_COUNT_PER_STEP) {
+      showMoreButtonElement.remove();
+    }
 
-showMoreButtonElement.addEventListener('click', showMoreButtonClickHandler);
+    renderFilmsBatch();
+  };
+
+  showMoreButtonElement.addEventListener('click', showMoreButtonClickHandler);
+}
 
 const generateFilmsExtra = (filmsData) => Object.entries(sortNameToSortFilms).map(
   ([sortName, sortFilms]) => ({sortName, sortedFilms: sortFilms(filmsData)}),
