@@ -12,3 +12,10 @@ export const getFormattedCommentDate = (date) => dayjs(date).isBetween(dayjs().s
   : dayjs(date).format('YYYY/MM/D HH:mm');
 
 export const sortByDate = (data) => data.sort((first, second) => dayjs(first.date).valueOf() - dayjs(second.date).valueOf());
+
+export const getFormattedDuration = (duration) => {
+  const hours = Math.trunc(duration / 60);
+  const minutes = duration % 60;
+
+  return `${(hours) ? String(hours).concat('h ') : ''}${minutes}m`;
+};

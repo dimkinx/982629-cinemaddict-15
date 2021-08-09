@@ -1,4 +1,4 @@
-import {getRandomItem} from '../utils/utils';
+import {getRandomItem} from '../utils/mock-utils';
 import {generateDate} from './film';
 
 const AUTHORS = [

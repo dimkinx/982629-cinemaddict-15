@@ -1,4 +1,6 @@
-export const createMenuTemplate = (films) => (
+import {createElement} from '../utils/dom-utils';
+
+const createMenuTemplate = (films) => (
   `<nav class="main-navigation">
     <div class="main-navigation__items">
       <a href="#all" class="main-navigation__item main-navigation__item--active">All movies</a>
@@ -15,3 +17,26 @@ export const createMenuTemplate = (films) => (
     <li><a href="#" class="sort__button">Sort by rating</a></li>
   </ul>`
 );
+
+export default class MenuView {
+  constructor(films) {
+    this._films = films;
+    this._element = null;
+  }
+
+  getTemplate() {
+    return createMenuTemplate(this._films);
+  }
+
+  getElement() {
+    if (!this._element) {
+      this._element = createElement(this.getTemplate());
+    }
+
+    return this._element;
+  }
+
+  removeElement() {
+    this._element = null;
+  }
+}
