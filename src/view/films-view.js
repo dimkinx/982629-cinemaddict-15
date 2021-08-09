@@ -1,6 +1,6 @@
 import {createElement} from '../utils/dom-utils';
 
-const createFilmsSectionTemplate = () => (
+const createFilmsTemplate = () => (
   `<section class="films">
     <section class="films-list">
       <h2 class="films-list__title visually-hidden">All movies. Upcoming</h2>
@@ -10,13 +10,13 @@ const createFilmsSectionTemplate = () => (
   </section>`
 );
 
-export default class FilmsSectionView {
+export default class FilmsView {
   constructor() {
     this._element = null;
   }
 
   getTemplate() {
-    return createFilmsSectionTemplate();
+    return createFilmsTemplate();
   }
 
   getElement() {

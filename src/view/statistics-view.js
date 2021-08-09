@@ -2,7 +2,7 @@ import {createElement} from '../utils/dom-utils';
 
 const REGEXP_ALL_FILMS_COUNT = /\B(?=(\d{3})+(?!\d))/g;
 
-const createStatisticsTemplate = (films) => `<p>${films.length.toString().replace(REGEXP_ALL_FILMS_COUNT, ' ')} movies inside</p>`;
+const createStatisticsTemplate = (count) => `<p>${count.toString().replace(REGEXP_ALL_FILMS_COUNT, ' ')} movies inside</p>`;
 
 export default class StatisticsView {
   constructor(films) {

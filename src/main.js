@@ -1,11 +1,11 @@
-import ProfileView from './view/profile';
-import MenuView from './view/menu';
-import FilmsSectionView from './view/films';
-import FilmsExtraView from './view/films-extra';
-import FilmCardView from './view/film';
-import ShowMoreButtonView from './view/show-more-button';
-import StatisticsView from './view/statistics';
-import FilmDetailsView from './view/details';
+import ProfileView from './view/profile-view';
+import MenuView from './view/menu-view';
+import FilmsView from './view/films-view';
+import FilmsExtraView from './view/films-extra-view';
+import FilmView from './view/film-view';
+import FilmsShowButtonView from './view/films-show-button-view';
+import StatisticsView from './view/statistics-view';
+import FilmDetailsView from './view/film-details-view';
 import {generateFilm} from './mock/film';
 import {generateComment} from './mock/comment';
 import {RenderPlace, render} from './utils/dom-utils';
@@ -43,7 +43,7 @@ const sortNameToSortFilms = {
 const headerElement = document.querySelector('.header');
 const mainElement = document.querySelector('.main');
 const footerElement = document.querySelector('.footer');
-const statisticsSectionElement = footerElement.querySelector('.footer__statistics');
+const statisticsElement = footerElement.querySelector('.footer__statistics');
 
 const films = new Array(FILMS_COUNT).fill(null).map((_, index) => generateFilm(index));
 const comments = films.map((film) => film.comments.map((id) => generateComment(id)));
@@ -60,13 +60,13 @@ const getProfileRank = (filmsData) => {
 
 render(headerElement, new ProfileView(getProfileRank(films)).getElement());
 render(mainElement, new MenuView(films).getElement());
-render(mainElement, new FilmsSectionView().getElement());
+render(mainElement, new FilmsView().getElement());
 
 const filmsSectionElement = mainElement.querySelector('.films');
 const filmsListContainerElement = filmsSectionElement.querySelector('.films-list__container');
 
 const renderFilm = (filmsListElement, filmData, filmCommentsData) => {
-  const filmCardComponent = new FilmCardView(filmData);
+  const filmCardComponent = new FilmView(filmData);
   const filmDetailsComponent = new FilmDetailsView(filmData, filmCommentsData);
 
   const filmCardClickHandler = (evt) => {
@@ -95,7 +95,7 @@ const renderFilmsBatch = () => tempFilms
   .map((tempFilm) => renderFilm(filmsListContainerElement, tempFilm, comments[tempFilm.id]));
 
 renderFilmsBatch();
-render(filmsListContainerElement, new ShowMoreButtonView().getElement(), RenderPlace.AFTER_END);
+render(filmsListContainerElement, new FilmsShowButtonView().getElement(), RenderPlace.AFTER_END);
 
 const showMoreButtonElement = filmsSectionElement.querySelector('.films-list__show-more');
 
@@ -113,7 +113,7 @@ const generateFilmsExtra = (filmsData) => Object.entries(sortNameToSortFilms).ma
   ([sortName, sortFilms]) => ({sortName, sortedFilms: sortFilms(filmsData)}),
 );
 
-const renderFilmsExtraSection = ({sortName, sortedFilms}) => {
+const renderFilmsExtra = ({sortName, sortedFilms}) => {
   if (sortedFilms.length !== 0) {
     const filmsExtraComponent = new FilmsExtraView(sortName);
     const containerElement = filmsExtraComponent.getElement().querySelector('.films-list__container');
@@ -124,8 +124,8 @@ const renderFilmsExtraSection = ({sortName, sortedFilms}) => {
 };
 
 const renderFilmsExtraSections = (filmsData) => generateFilmsExtra(filmsData)
-  .map((sortNameToSortedFilms) => renderFilmsExtraSection(sortNameToSortedFilms));
+  .map((sortNameToSortedFilms) => renderFilmsExtra(sortNameToSortedFilms));
 
 renderFilmsExtraSections(films);
 
-render(statisticsSectionElement, new StatisticsView(films).getElement());
+render(statisticsElement, new StatisticsView(films.length).getElement());
