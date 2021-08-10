@@ -1,4 +1,4 @@
-import {createElement} from '../utils/dom-utils';
+import AbstractView from './abstract-view';
 
 const createProfileTemplate = (rank) => (
   `<section class="header__profile profile">
@@ -7,25 +7,13 @@ const createProfileTemplate = (rank) => (
   </section>`
 );
 
-export default class ProfileView {
+export default class ProfileView extends AbstractView {
   constructor(rank) {
+    super();
     this._rank = rank;
-    this._element = null;
   }
 
   getTemplate() {
     return createProfileTemplate(this._rank);
-  }
-
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-
-    return this._element;
-  }
-
-  removeElement() {
-    this._element = null;
   }
 }
