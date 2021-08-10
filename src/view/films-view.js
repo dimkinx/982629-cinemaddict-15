@@ -1,22 +1,23 @@
 import {createElement} from '../utils/dom-utils';
 
-const createFilmsTemplate = () => (
+const createFilmsTemplate = (filmsCount) => (
   `<section class="films">
     <section class="films-list">
-      <h2 class="films-list__title visually-hidden">All movies. Upcoming</h2>
+      <h2 class="films-list__title${(filmsCount) ? ' visually-hidden' : ''}">${(filmsCount) ? 'All movies. Upcoming' : 'There are no movies in our database'}</h2>
 
-      <div class="films-list__container"></div>
+      ${(filmsCount) ? '<div class="films-list__container"></div>' : ''}
     </section>
   </section>`
 );
 
 export default class FilmsView {
-  constructor() {
+  constructor(filmsCount) {
+    this._filmsCount = filmsCount;
     this._element = null;
   }
 
   getTemplate() {
-    return createFilmsTemplate();
+    return createFilmsTemplate(this._filmsCount);
   }
 
   getElement() {

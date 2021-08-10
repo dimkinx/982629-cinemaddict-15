@@ -8,7 +8,7 @@ import StatisticsView from './view/statistics-view';
 import FilmDetailsView from './view/film-details-view';
 import {generateFilm} from './mock/film';
 import {generateComment} from './mock/comment';
-import {RenderPlace, render} from './utils/dom-utils';
+import {RenderPlace, render, isEscEvent} from './utils/dom-utils';
 
 const FILMS_COUNT = 17;
 const FILMS_COUNT_PER_STEP = 5;
@@ -60,34 +60,38 @@ const getProfileRank = (filmsData) => {
 
 render(headerElement, new ProfileView(getProfileRank(films)).getElement());
 render(mainElement, new MenuView(films).getElement());
-render(mainElement, new FilmsView().getElement());
+render(mainElement, new FilmsView(films.length).getElement());
 
 const filmsSectionElement = mainElement.querySelector('.films');
 const filmsListContainerElement = filmsSectionElement.querySelector('.films-list__container');
 
 const renderFilm = (filmsListElement, filmData, filmCommentsData) => {
-  const filmCardComponent = new FilmView(filmData);
+  const filmComponent = new FilmView(filmData);
   const filmDetailsComponent = new FilmDetailsView(filmData, filmCommentsData);
 
-  const filmCardClickHandler = (evt) => {
-    evt.preventDefault();
-    document.body.classList.add('hide-overflow');
-    document.body.appendChild(filmDetailsComponent.getElement());
-  };
-
-  filmCardComponent.getElement().querySelector('.film-card__title').addEventListener('click', filmCardClickHandler);
-  filmCardComponent.getElement().querySelector('.film-card__poster').addEventListener('click', filmCardClickHandler);
-  filmCardComponent.getElement().querySelector('.film-card__comments').addEventListener('click', filmCardClickHandler);
-
-  const detailsCloseBtnClickHandler = (evt) => {
-    evt.preventDefault();
+  const closeFilmDetailsClickHandler = () => {
     document.body.classList.remove('hide-overflow');
     document.body.removeChild(filmDetailsComponent.getElement());
   };
 
-  filmDetailsComponent.getElement().querySelector('.film-details__close-btn').addEventListener('click', detailsCloseBtnClickHandler);
+  const escKeyDownHandler = (evt) => {
+    if (isEscEvent(evt)) {
+      evt.preventDefault();
+      closeFilmDetailsClickHandler();
+      document.removeEventListener('keydown', escKeyDownHandler);
+    }
+  };
 
-  render(filmsListElement, filmCardComponent.getElement());
+  const openFilmDetailsClickHandler = () => {
+    document.addEventListener('keydown', escKeyDownHandler);
+    document.body.classList.add('hide-overflow');
+    document.body.appendChild(filmDetailsComponent.getElement());
+  };
+
+  filmComponent.setOpenFilmDetailsClickHandler(openFilmDetailsClickHandler);
+  filmDetailsComponent.setCloseFilmDetailsClickHandler(closeFilmDetailsClickHandler);
+
+  render(filmsListElement, filmComponent.getElement());
 };
 
 const renderFilmsBatch = () => tempFilms
@@ -95,19 +99,22 @@ const renderFilmsBatch = () => tempFilms
   .map((tempFilm) => renderFilm(filmsListContainerElement, tempFilm, comments[tempFilm.id]));
 
 renderFilmsBatch();
-render(filmsListContainerElement, new FilmsShowButtonView().getElement(), RenderPlace.AFTER_END);
 
-const showMoreButtonElement = filmsSectionElement.querySelector('.films-list__show-more');
+if (films.length) {
+  render(filmsListContainerElement, new FilmsShowButtonView().getElement(), RenderPlace.AFTER_END);
 
-const showMoreButtonClickHandler = () => {
-  if (tempFilms.length <= FILMS_COUNT_PER_STEP) {
-    showMoreButtonElement.remove();
-  }
+  const showMoreButtonElement = filmsSectionElement.querySelector('.films-list__show-more');
 
-  renderFilmsBatch();
-};
+  const showMoreButtonClickHandler = () => {
+    if (tempFilms.length <= FILMS_COUNT_PER_STEP) {
+      showMoreButtonElement.remove();
+    }
 
-showMoreButtonElement.addEventListener('click', showMoreButtonClickHandler);
+    renderFilmsBatch();
+  };
+
+  showMoreButtonElement.addEventListener('click', showMoreButtonClickHandler);
+}
 
 const generateFilmsExtra = (filmsData) => Object.entries(sortNameToSortFilms).map(
   ([sortName, sortFilms]) => ({sortName, sortedFilms: sortFilms(filmsData)}),

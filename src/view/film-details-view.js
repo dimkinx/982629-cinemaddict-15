@@ -135,6 +135,8 @@ export default class FilmDetailsView {
     this._film = film;
     this._comments = comments;
     this._element = null;
+    this._callback = {};
+    this._closeFilmDetailsClickHandler = this._closeFilmDetailsClickHandler.bind(this);
   }
 
   getTemplate() {
@@ -151,5 +153,15 @@ export default class FilmDetailsView {
 
   removeElement() {
     this._element = null;
+  }
+
+  _closeFilmDetailsClickHandler(evt) {
+    evt.preventDefault();
+    this._callback.closeFilmDetailsClick();
+  }
+
+  setCloseFilmDetailsClickHandler(callback) {
+    this._callback.closeFilmDetailsClick = callback;
+    this.getElement().querySelector('.film-details__close-btn').addEventListener('click', this._closeFilmDetailsClickHandler);
   }
 }
