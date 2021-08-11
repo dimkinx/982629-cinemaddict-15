@@ -1,5 +1,5 @@
 import {getFormattedCommentDate, getFormattedDate, sortByDate, getFormattedDuration} from '../utils/date-time-utils';
-import {createElement} from '../utils/dom-utils';
+import AbstractView from './abstract-view';
 
 const createCommentTemplate = (comment) => (
   `<li class="film-details__comment">
@@ -130,29 +130,16 @@ const createFilmDetailsTemplate = (film, comments) => (
   </section>`
 );
 
-export default class FilmDetailsView {
+export default class FilmDetailsView extends AbstractView {
   constructor(film, comments) {
+    super();
     this._film = film;
     this._comments = comments;
-    this._element = null;
-    this._callback = {};
     this._closeFilmDetailsClickHandler = this._closeFilmDetailsClickHandler.bind(this);
   }
 
   getTemplate() {
     return createFilmDetailsTemplate(this._film, this._comments);
-  }
-
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-
-    return this._element;
-  }
-
-  removeElement() {
-    this._element = null;
   }
 
   _closeFilmDetailsClickHandler(evt) {

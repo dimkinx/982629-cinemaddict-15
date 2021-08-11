@@ -1,14 +1,17 @@
 import {createElement} from '../utils/dom-utils';
 
-const createFilmsShowButtonTemplate = () => '<button class="films-list__show-more">Show more</button>';
-
-export default class FilmsShowButtonView {
+export default class AbstractView {
   constructor() {
+    if (new.target === AbstractView) {
+      throw new Error('Can\'t instantiate AbstractView, only concrete one.');
+    }
+
     this._element = null;
+    this._callback = {};
   }
 
   getTemplate() {
-    return createFilmsShowButtonTemplate();
+    throw new Error('AbstractView method not implemented: getTemplate');
   }
 
   getElement() {
