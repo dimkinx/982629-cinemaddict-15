@@ -5,21 +5,21 @@ export const RenderPlace = {
   AFTER_END: 'afterend',
 };
 
-export const render = (container, element, place = RenderPlace.BEFORE_END) => {
+export const render = (container, child, place = RenderPlace.BEFORE_END) => {
   if (container instanceof AbstractView) {
     container = container.getElement();
   }
 
-  if (element instanceof AbstractView) {
-    element = element.getElement();
+  if (child instanceof AbstractView) {
+    child = child.getElement();
   }
 
   switch (place) {
     case RenderPlace.BEFORE_END:
-      container.append(element);
+      container.append(child);
       break;
     case RenderPlace.AFTER_END:
-      container.after(element);
+      container.after(child);
   }
 };
 
@@ -27,7 +27,7 @@ export const createElement = (template) => {
   const newElement = document.createElement('div');
   newElement.innerHTML = template;
 
-  return newElement.firstChild;
+  return newElement.firstElementChild;
 };
 
 export const remove = (component) => {

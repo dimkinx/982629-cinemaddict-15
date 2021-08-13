@@ -1,6 +1,6 @@
 import AbstractView from './abstract-view';
 
-const createMenuTemplate = (films) => (
+const createNavigationTemplate = (films) => (
   `<nav class="main-navigation">
     <div class="main-navigation__items">
       <a href="#all" class="main-navigation__item main-navigation__item--active">All movies</a>
@@ -9,22 +9,16 @@ const createMenuTemplate = (films) => (
       <a href="#favorites" class="main-navigation__item">Favorites <span class="main-navigation__item-count">${films.filter((film) => film.userDetails.favorite).length}</span></a>
     </div>
     <a href="#stats" class="main-navigation__additional">Stats</a>
-  </nav>
-
-  <ul class="sort">
-    <li><a href="#" class="sort__button sort__button--active">Sort by default</a></li>
-    <li><a href="#" class="sort__button">Sort by date</a></li>
-    <li><a href="#" class="sort__button">Sort by rating</a></li>
-  </ul>`
+  </nav>`
 );
 
-export default class MenuView extends AbstractView {
+export default class NavigationView extends AbstractView {
   constructor(films) {
     super();
     this._films = films;
   }
 
   getTemplate() {
-    return createMenuTemplate(this._films);
+    return createNavigationTemplate(this._films);
   }
 }
