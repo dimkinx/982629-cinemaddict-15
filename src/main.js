@@ -7,18 +7,24 @@ import {generateComment} from './mock/comment';
 import FilmsPresenter from './presenter/films-presenter';
 import {render} from './utils/dom-utils';
 
-const FILMS_COUNT = 17;
+const FILMS_COUNT = 1;
+
+const ProfileRank = {
+  NOVICE: 'novice',
+  FAN: 'fan',
+  MOVIE_BUFF: 'movie buff',
+};
 
 const rankToRangeViewsCount = {
-  'novice': {
+  [ProfileRank.NOVICE]: {
     min: 1,
     max: 10,
   },
-  'fan': {
+  [ProfileRank.FAN]: {
     min: 11,
     max: 20,
   },
-  'movie buff': {
+  [ProfileRank.MOVIE_BUFF]: {
     min: 21,
     max: Infinity,
   },
@@ -38,17 +44,19 @@ const getProfileRank = (filmsData) => {
   const viewsCount = filmsData.filter((film) => film.userDetails.alreadyWatched).length;
   let rank = '';
 
-  Object.entries(rankToRangeViewsCount).forEach(([key, value]) => (viewsCount >= value.min && viewsCount <= value.max) && (rank = key));
+  Object
+    .entries(rankToRangeViewsCount)
+    .forEach(([key, value]) => (viewsCount >= value.min && viewsCount <= value.max) && (rank = key));
 
   return rank;
 };
+
+render(mainElement, new NavigationView(films));
+render(statisticsElement, new StatisticsView(films.length));
 
 if (films.length) {
   render(headerElement, new ProfileView(getProfileRank(films)));
   render(mainElement, new SortView());
 }
-
-render(mainElement, new NavigationView(films));
-render(statisticsElement, new StatisticsView(films.length));
 
 filmsPresenter.init(films, comments);

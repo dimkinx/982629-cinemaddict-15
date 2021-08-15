@@ -5,6 +5,13 @@ export const RenderPlace = {
   AFTER_END: 'afterend',
 };
 
+export const createElement = (template) => {
+  const newElement = document.createElement('div');
+  newElement.innerHTML = template;
+
+  return newElement.firstElementChild;
+};
+
 export const render = (container, child, place = RenderPlace.BEFORE_END) => {
   if (container instanceof AbstractView) {
     container = container.getElement();
@@ -23,14 +30,29 @@ export const render = (container, child, place = RenderPlace.BEFORE_END) => {
   }
 };
 
-export const createElement = (template) => {
-  const newElement = document.createElement('div');
-  newElement.innerHTML = template;
+export const replace = (newChild, oldChild) => {
+  if (oldChild instanceof AbstractView) {
+    oldChild = oldChild.getElement();
+  }
 
-  return newElement.firstElementChild;
+  if (newChild instanceof AbstractView) {
+    newChild = newChild.getElement();
+  }
+
+  const parent = oldChild.parentElement;
+
+  if (parent === null || newChild === null) {
+    throw new Error('Can\'t replace unexisting elements');
+  }
+
+  parent.replaceChild(newChild, oldChild);
 };
 
 export const remove = (component) => {
+  if (component === null) {
+    return;
+  }
+
   if (!(component instanceof AbstractView)) {
     throw new Error('Can remove only components');
   }
@@ -40,3 +62,5 @@ export const remove = (component) => {
 };
 
 export const isEscEvent = (evt) => evt.key === 'Escape' || evt.key === 'Esc';
+
+export const addActiveModifier = (predicate, className) => predicate ? `${className} ${className}--active`: className;
