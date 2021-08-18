@@ -7,7 +7,7 @@ import {generateComment} from './mock/comment';
 import FilmsPresenter from './presenter/films-presenter';
 import {render} from './utils/dom-utils';
 
-const FILMS_COUNT = 1;
+const FILMS_COUNT = 17;
 
 const ProfileRank = {
   NOVICE: 'novice',
