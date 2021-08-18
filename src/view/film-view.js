@@ -42,11 +42,6 @@ export default class FilmView extends AbstractView {
     return createFilmCardTemplate(this._film);
   }
 
-  _openFilmDetailsClickHandler(evt) {
-    evt.preventDefault();
-    this._callback.openFilmDetailsClick();
-  }
-
   setOpenFilmDetailsClickHandler(callback) {
     this._callback.openFilmDetailsClick = callback;
     this.getElement().querySelector('.film-card__title').addEventListener('click', this._openFilmDetailsClickHandler);
@@ -54,19 +49,9 @@ export default class FilmView extends AbstractView {
     this.getElement().querySelector('.film-card__comments').addEventListener('click', this._openFilmDetailsClickHandler);
   }
 
-  _watchlistButtonClickHandler(evt) {
-    evt.preventDefault();
-    this._callback.watchlistButtonClick();
-  }
-
   setWatchlistButtonClickHandler(callback) {
     this._callback.watchlistButtonClick = callback;
     this.getElement().querySelector('.film-card__controls-item--add-to-watchlist').addEventListener('click', this._watchlistButtonClickHandler);
-  }
-
-  _watchedButtonClickHandler(evt) {
-    evt.preventDefault();
-    this._callback.watchedButtonClick();
   }
 
   setWatchedButtonClickHandler(callback) {
@@ -74,13 +59,28 @@ export default class FilmView extends AbstractView {
     this.getElement().querySelector('.film-card__controls-item--mark-as-watched').addEventListener('click', this._watchedButtonClickHandler);
   }
 
-  _favoriteButtonClickHandler(evt) {
-    evt.preventDefault();
-    this._callback.favoriteButtonClick();
-  }
-
   setFavoriteButtonClickHandler(callback) {
     this._callback.favoriteButtonClick = callback;
     this.getElement().querySelector('.film-card__controls-item--favorite').addEventListener('click', this._favoriteButtonClickHandler);
+  }
+
+  _openFilmDetailsClickHandler(evt) {
+    evt.preventDefault();
+    this._callback.openFilmDetailsClick();
+  }
+
+  _watchlistButtonClickHandler(evt) {
+    evt.preventDefault();
+    this._callback.watchlistButtonClick();
+  }
+
+  _watchedButtonClickHandler(evt) {
+    evt.preventDefault();
+    this._callback.watchedButtonClick();
+  }
+
+  _favoriteButtonClickHandler(evt) {
+    evt.preventDefault();
+    this._callback.favoriteButtonClick();
   }
 }

@@ -33,12 +33,12 @@ export default class FilmPresenter {
     remove(previous);
   }
 
-  _renderFilm() {
-    render(this._filmListContainer, this._filmComponent);
-  }
-
   destroy() {
     remove(this._filmComponent);
+  }
+
+  _renderFilm() {
+    render(this._filmListContainer, this._filmComponent);
   }
 
   _handleOpenFilmDetailsClick() {

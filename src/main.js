@@ -40,8 +40,8 @@ const comments = films.map((film) => film.comments.map((id) => generateComment(i
 
 const filmsPresenter = new FilmsPresenter(mainElement, footerElement);
 
-const getProfileRank = (filmsData) => {
-  const viewsCount = filmsData.filter((film) => film.userDetails.alreadyWatched).length;
+const getProfileRank = () => {
+  const viewsCount = films.filter((film) => film.userDetails.alreadyWatched).length;
   let rank = '';
 
   Object
@@ -55,7 +55,7 @@ render(mainElement, new NavigationView(films));
 render(statisticsElement, new StatisticsView(films.length));
 
 if (films.length) {
-  render(headerElement, new ProfileView(getProfileRank(films)));
+  render(headerElement, new ProfileView(getProfileRank()));
   render(mainElement, new SortView());
 }
 

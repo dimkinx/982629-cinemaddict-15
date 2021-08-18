@@ -34,12 +34,12 @@ export default class FilmDetailsPresenter {
     remove(previous);
   }
 
-  _renderFilmDetails() {
-    render(this._footerContainer, this._filmDetailsComponent, RenderPlace.AFTER_END);
-  }
-
   destroy() {
     remove(this._filmDetailsComponent);
+  }
+
+  _renderFilmDetails() {
+    render(this._footerContainer, this._filmDetailsComponent, RenderPlace.AFTER_END);
   }
 
   _handleCloseFilmDetailsClick() {
