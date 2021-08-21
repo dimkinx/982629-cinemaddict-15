@@ -2,8 +2,7 @@ import FilmsView from '../view/films-view';
 import FilmsExtraView from '../view/films-extra-view';
 import ShowMoreButtonView from '../view/show-more-button-view';
 import FilmPresenter from './film-presenter';
-import FilmDetailsPresenter from './film-details-presenter';
-import {RenderPlace, render, remove, updateItem, isEscEvent} from '../utils/dom-utils';
+import {RenderPlace, render, update, remove} from '../utils/dom-utils';
 
 const FILMS_COUNT_PER_STEP = 5;
 const FILMS_EXTRA_COUNT = 2;
@@ -45,9 +44,8 @@ const ExtraList = {
 };
 
 export default class FilmsPresenter {
-  constructor(mainContainer, footerContainer) {
+  constructor(mainContainer) {
     this._mainContainer = mainContainer;
-    this._footerContainer = footerContainer;
     this._renderedFilmCount = FILMS_COUNT_PER_STEP;
 
     this._filmPresenter = new Map();
@@ -58,9 +56,6 @@ export default class FilmsPresenter {
 
     this._handleFilmChange = this._handleFilmChange.bind(this);
     this._handleShowMoreButtonClick = this._handleShowMoreButtonClick.bind(this);
-    this._escKeyDownHandler = this._escKeyDownHandler.bind(this);
-    this._handleCloseFilmDetails = this._handleCloseFilmDetails.bind(this);
-    this._handleOpenFilmDetails = this._handleOpenFilmDetails.bind(this);
   }
 
   init(films, comments) {
@@ -74,8 +69,8 @@ export default class FilmsPresenter {
 
   _renderFilm(filmListContainer, film, type) {
     type = (type) ? type.split(' ').map((subType) => `${subType[0].toUpperCase()}${subType.slice(1)}`).join('') : '';
-    const filmPresenter = new FilmPresenter(filmListContainer, this._handleFilmChange, this._handleOpenFilmDetails);
-    filmPresenter.init(film);
+    const filmPresenter = new FilmPresenter(filmListContainer, this._handleFilmChange);
+    filmPresenter.init(film, this._comments[film.id]);
     this[`_film${type}Presenter`].set(film.id, filmPresenter);
   }
 
@@ -120,23 +115,14 @@ export default class FilmsPresenter {
   }
 
   _handleFilmChange(updatedFilm) {
-    this._films = updateItem(this._films, updatedFilm);
+    this._films = update(this._films, updatedFilm);
+    const presenters = [
+      this._filmPresenter.get(updatedFilm.id),
+      this._filmTopRatedPresenter.get(updatedFilm.id),
+      this._filmMostCommentedPresenter.get(updatedFilm.id),
+    ];
 
-    if (this._filmPresenter.has(updatedFilm.id)) {
-      this._filmPresenter.get(updatedFilm.id).init(updatedFilm, this._comments[updatedFilm.id]);
-    }
-
-    if (this._filmTopRatedPresenter.has(updatedFilm.id)) {
-      this._filmTopRatedPresenter.get(updatedFilm.id).init(updatedFilm, this._comments[updatedFilm.id]);
-    }
-
-    if (this._filmMostCommentedPresenter.has(updatedFilm.id)) {
-      this._filmMostCommentedPresenter.get(updatedFilm.id).init(updatedFilm, this._comments[updatedFilm.id]);
-    }
-
-    if (this._filmDetailsPresenter && this._filmDetailsPresenter.id === updatedFilm.id) {
-      this._filmDetailsPresenter.init(updatedFilm, this._comments[updatedFilm.id]);
-    }
+    presenters.forEach((presenter) => presenter && presenter.init(updatedFilm, this._comments[updatedFilm.id]));
   }
 
   _handleShowMoreButtonClick() {
@@ -147,28 +133,5 @@ export default class FilmsPresenter {
     if (this._renderedFilmCount >= this._films.length) {
       remove(this._showMoreButtonComponent);
     }
-  }
-
-  _escKeyDownHandler(evt) {
-    if (isEscEvent(evt)) {
-      evt.preventDefault();
-      this._handleCloseFilmDetails();
-    }
-  }
-
-  _handleCloseFilmDetails() {
-    this._filmDetailsPresenter.destroy();
-    this._filmDetailsPresenter = null;
-    document.body.classList.remove('hide-overflow');
-    document.removeEventListener('keydown', this._escKeyDownHandler);
-  }
-
-  _handleOpenFilmDetails(film) {
-    if (!this._filmDetailsPresenter) {
-      this._filmDetailsPresenter = new FilmDetailsPresenter(this._footerContainer, this._handleFilmChange, this._handleCloseFilmDetails);
-      document.addEventListener('keydown', this._escKeyDownHandler);
-    }
-
-    this._filmDetailsPresenter.init(film, this._comments[film.id]);
   }
 }
