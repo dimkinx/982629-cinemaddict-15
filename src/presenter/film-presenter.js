@@ -74,6 +74,13 @@ export default class FilmPresenter {
   }
 
   _handleOpenFilmDetailsClick() {
+    const filmDetailsElement = document.body.querySelector('.film-details');
+
+    if (filmDetailsElement) {
+      filmDetailsElement.remove();
+      this._handleCloseFilmDetailsClick();
+    }
+
     if (this._filmDetailsComponent === null) {
       document.body.classList.add('hide-overflow');
       document.addEventListener('keydown', this._escKeyDownHandler);
