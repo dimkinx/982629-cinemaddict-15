@@ -1,6 +1,5 @@
 import ProfileView from './view/profile-view';
 import NavigationView from './view/navigation-view';
-import SortView from './view/sort-view';
 import StatisticsView from './view/statistics-view';
 import {generateFilm} from './mock/film';
 import {generateComment} from './mock/comment';
@@ -17,7 +16,7 @@ const statisticsElement = footerElement.querySelector('.footer__statistics');
 const films = new Array(FILMS_COUNT).fill(null).map((_, index) => generateFilm(index));
 const comments = films.map((film) => film.comments.map((id) => generateComment(id)));
 
-const filmsPresenter = new FilmsPresenter(mainElement, footerElement);
+const filmsPresenter = new FilmsPresenter(mainElement);
 
 const getProfileRank = () => {
   const viewsCount = films.filter((film) => film.userDetails.alreadyWatched).length;
@@ -35,7 +34,6 @@ render(statisticsElement, new StatisticsView(films.length));
 
 if (films.length) {
   render(headerElement, new ProfileView(getProfileRank()));
-  render(mainElement, new SortView());
 }
 
 filmsPresenter.init(films, comments);

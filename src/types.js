@@ -1,4 +1,5 @@
 import {FILMS_EXTRA_COUNT} from './const';
+import {sortFilmsByDate} from './utils/date-time-utils';
 
 export const RenderPlace = {
   BEFORE_END: 'beforeend',
@@ -48,15 +49,15 @@ export const FilterList = {
 export const SortList = {
   DEFAULT: {
     type: 'default',
-    getFilms: () => {},
+    getFilms: (films, sourcedFilms) => Object.assign(films, sourcedFilms),
   },
   DATE: {
     type: 'date',
-    getFilms: () => {},
+    getFilms: (films) => films.sort(sortFilmsByDate),
   },
   RATING: {
     type: 'rating',
-    getFilms: () => {},
+    getFilms: (films) => films.sort((first, second) => second.filmInfo.totalRating - first.filmInfo.totalRating),
   },
 };
 
