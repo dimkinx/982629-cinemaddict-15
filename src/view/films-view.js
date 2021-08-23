@@ -1,9 +1,9 @@
 import AbstractView from './abstract-view';
 
-const createFilmsTemplate = (filmsCount) => (
+const createFilmsTemplate = (filmsCount, title) => (
   `<section class="films">
     <section class="films-list">
-      <h2 class="films-list__title${(filmsCount) ? ' visually-hidden' : ''}">${(filmsCount) ? 'All movies. Upcoming' : 'There are no movies in our database'}</h2>
+      <h2 class="films-list__title ${(filmsCount) ? 'visually-hidden' : ''}">${(filmsCount) ? 'All movies. Upcoming' : `${title}`}</h2>
 
       ${(filmsCount) ? '<div class="films-list__container"></div>' : ''}
     </section>
@@ -11,12 +11,13 @@ const createFilmsTemplate = (filmsCount) => (
 );
 
 export default class FilmsView extends AbstractView {
-  constructor(filmsCount) {
+  constructor(filmsCount, title) {
     super();
     this._filmsCount = filmsCount;
+    this._title = title;
   }
 
   getTemplate() {
-    return createFilmsTemplate(this._filmsCount);
+    return createFilmsTemplate(this._filmsCount, this._title);
   }
 }

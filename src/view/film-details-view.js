@@ -1,4 +1,5 @@
 import {getFormattedCommentDate, getFormattedDate, sortByDate, getFormattedDuration} from '../utils/date-time-utils';
+import {addActiveModifier} from '../utils/dom-utils';
 import AbstractView from './abstract-view';
 
 const createCommentTemplate = (comment) => (
@@ -81,9 +82,9 @@ const createFilmDetailsTemplate = (film, comments) => (
         </div>
 
         <section class="film-details__controls">
-          <button type="button" class="film-details__control-button film-details__control-button--watchlist ${(film.userDetails.watchlist) && 'film-details__control-button--active'}" id="watchlist" name="watchlist">Add to watchlist</button>
-          <button type="button" class="film-details__control-button film-details__control-button--watched ${(film.userDetails.alreadyWatched) && 'film-details__control-button--active'}" id="watched" name="watched">Already watched</button>
-          <button type="button" class="film-details__control-button film-details__control-button--favorite ${(film.userDetails.favorite) && 'film-details__control-button--active'}" id="favorite" name="favorite">Add to favorites</button>
+          <button type="button" class="${addActiveModifier(film.userDetails.watchlist, 'film-details__control-button')} film-details__control-button--watchlist" id="watchlist" name="watchlist">Add to watchlist</button>
+          <button type="button" class="${addActiveModifier(film.userDetails.alreadyWatched, 'film-details__control-button')} film-details__control-button--watched" id="watched" name="watched">Already watched</button>
+          <button type="button" class="${addActiveModifier(film.userDetails.favorite, 'film-details__control-button')} film-details__control-button--favorite" id="favorite" name="favorite">Add to favorites</button>
         </section>
       </div>
 
@@ -136,10 +137,33 @@ export default class FilmDetailsView extends AbstractView {
     this._film = film;
     this._comments = comments;
     this._closeFilmDetailsClickHandler = this._closeFilmDetailsClickHandler.bind(this);
+    this._watchlistButtonClickHandler = this._watchlistButtonClickHandler.bind(this);
+    this._watchedButtonClickHandler = this._watchedButtonClickHandler.bind(this);
+    this._favoriteButtonClickHandler = this._favoriteButtonClickHandler.bind(this);
   }
 
   getTemplate() {
     return createFilmDetailsTemplate(this._film, this._comments);
+  }
+
+  setCloseFilmDetailsClickHandler(callback) {
+    this._callback.closeFilmDetailsClick = callback;
+    this.getElement().querySelector('.film-details__close-btn').addEventListener('click', this._closeFilmDetailsClickHandler);
+  }
+
+  setWatchlistButtonClickHandler(callback) {
+    this._callback.watchlistButtonClick = callback;
+    this.getElement().querySelector('#watchlist').addEventListener('click', this._watchlistButtonClickHandler);
+  }
+
+  setWatchedButtonClickHandler(callback) {
+    this._callback.watchedButtonClick = callback;
+    this.getElement().querySelector('#watched').addEventListener('click', this._watchedButtonClickHandler);
+  }
+
+  setFavoriteButtonClickHandler(callback) {
+    this._callback.favoriteButtonClick = callback;
+    this.getElement().querySelector('#favorite').addEventListener('click', this._favoriteButtonClickHandler);
   }
 
   _closeFilmDetailsClickHandler(evt) {
@@ -147,8 +171,18 @@ export default class FilmDetailsView extends AbstractView {
     this._callback.closeFilmDetailsClick();
   }
 
-  setCloseFilmDetailsClickHandler(callback) {
-    this._callback.closeFilmDetailsClick = callback;
-    this.getElement().querySelector('.film-details__close-btn').addEventListener('click', this._closeFilmDetailsClickHandler);
+  _watchlistButtonClickHandler(evt) {
+    evt.preventDefault();
+    this._callback.watchlistButtonClick();
+  }
+
+  _watchedButtonClickHandler(evt) {
+    evt.preventDefault();
+    this._callback.watchedButtonClick();
+  }
+
+  _favoriteButtonClickHandler(evt) {
+    evt.preventDefault();
+    this._callback.favoriteButtonClick();
   }
 }
