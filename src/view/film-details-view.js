@@ -1,6 +1,6 @@
+import AbstractView from './abstract-view';
 import {getFormattedCommentDate, getFormattedDate, sortByDate, getFormattedDuration} from '../utils/date-time-utils';
 import {addActiveModifier} from '../utils/dom-utils';
-import AbstractView from './abstract-view';
 
 const createCommentTemplate = (comment) => (
   `<li class="film-details__comment">

@@ -2,46 +2,9 @@ import FilmsView from '../view/films-view';
 import FilmsExtraView from '../view/films-extra-view';
 import ShowMoreButtonView from '../view/show-more-button-view';
 import FilmPresenter from './film-presenter';
-import {RenderPlace, render, update, remove} from '../utils/dom-utils';
-
-const FILMS_COUNT_PER_STEP = 5;
-const FILMS_EXTRA_COUNT = 2;
-
-const FilterList = {
-  ALL_MOVIES: {
-    title: 'There are no movies in our database',
-    getFilms: () => {},
-  },
-  WATCHLIST: {
-    title: 'There are no movies to watch now',
-    getFilms: () => {},
-  },
-  HISTORY: {
-    title: 'There are no watched movies now',
-    getFilms: () => {},
-  },
-  FAVORITES: {
-    title: 'There are no favorite movies now',
-    getFilms: () => {},
-  },
-};
-
-const ExtraList = {
-  TOP_RATED: {
-    title: 'Top rated',
-    getFilms: (films) => films
-      .slice()
-      .sort((first, second) => second.filmInfo.totalRating - first.filmInfo.totalRating)
-      .slice(0, FILMS_EXTRA_COUNT),
-  },
-  MOST_COMMENTED: {
-    title: 'Most commented',
-    getFilms: (films) => films
-      .filter((film) => film.comments.length > 0)
-      .sort((first, second) => second.comments.length - first.comments.length)
-      .slice(0, FILMS_EXTRA_COUNT),
-  },
-};
+import {FILMS_COUNT_PER_STEP} from '../const';
+import {RenderPlace, ExtraList, FilterList} from '../types';
+import {render, update, remove} from '../utils/dom-utils';
 
 export default class FilmsPresenter {
   constructor(mainContainer) {
@@ -109,7 +72,7 @@ export default class FilmsPresenter {
   _renderFilms() {
     render(this._mainContainer, this._filmsComponent);
 
-    if (this._films.length !== 0) {
+    if (this._films.length) {
       this._renderFilmsBatch();
       this._renderFilmsExtra();
     }

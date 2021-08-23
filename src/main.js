@@ -5,30 +5,9 @@ import StatisticsView from './view/statistics-view';
 import {generateFilm} from './mock/film';
 import {generateComment} from './mock/comment';
 import FilmsPresenter from './presenter/films-presenter';
+import {FILMS_COUNT} from './const';
+import {rankToRangeViewsCount} from './types';
 import {render} from './utils/dom-utils';
-
-const FILMS_COUNT = 17;
-
-const ProfileRank = {
-  NOVICE: 'novice',
-  FAN: 'fan',
-  MOVIE_BUFF: 'movie buff',
-};
-
-const rankToRangeViewsCount = {
-  [ProfileRank.NOVICE]: {
-    min: 1,
-    max: 10,
-  },
-  [ProfileRank.FAN]: {
-    min: 11,
-    max: 20,
-  },
-  [ProfileRank.MOVIE_BUFF]: {
-    min: 21,
-    max: Infinity,
-  },
-};
 
 const headerElement = document.querySelector('.header');
 const mainElement = document.querySelector('.main');
