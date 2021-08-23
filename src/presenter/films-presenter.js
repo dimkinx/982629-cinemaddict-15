@@ -54,8 +54,9 @@ export default class FilmsPresenter {
 
     this._showMoreButtonComponent = new ShowMoreButtonView();
 
-    this._handleFilmChange = this._handleFilmChange.bind(this);
     this._handleShowMoreButtonClick = this._handleShowMoreButtonClick.bind(this);
+    this._handleFilmChange = this._handleFilmChange.bind(this);
+    this._handlePopupStateChange = this._handlePopupStateChange.bind(this);
   }
 
   init(films, comments) {
@@ -69,7 +70,7 @@ export default class FilmsPresenter {
 
   _renderFilm(filmListContainer, film, type) {
     type = (type) ? type.split(' ').map((subType) => `${subType[0].toUpperCase()}${subType.slice(1)}`).join('') : '';
-    const filmPresenter = new FilmPresenter(filmListContainer, this._handleFilmChange);
+    const filmPresenter = new FilmPresenter(filmListContainer, this._handleFilmChange, this._handlePopupStateChange);
     filmPresenter.init(film, this._comments[film.id]);
     this[`_film${type}Presenter`].set(film.id, filmPresenter);
   }
@@ -114,17 +115,6 @@ export default class FilmsPresenter {
     }
   }
 
-  _handleFilmChange(updatedFilm) {
-    this._films = update(this._films, updatedFilm);
-    const presenters = [
-      this._filmPresenter.get(updatedFilm.id),
-      this._filmTopRatedPresenter.get(updatedFilm.id),
-      this._filmMostCommentedPresenter.get(updatedFilm.id),
-    ];
-
-    presenters.forEach((presenter) => presenter && presenter.init(updatedFilm, this._comments[updatedFilm.id]));
-  }
-
   _handleShowMoreButtonClick() {
     this._renderFilmsBatch(this._renderedFilmCount);
 
@@ -133,5 +123,23 @@ export default class FilmsPresenter {
     if (this._renderedFilmCount >= this._films.length) {
       remove(this._showMoreButtonComponent);
     }
+  }
+
+  _handleFilmChange(updatedFilm) {
+    this._films = update(this._films, updatedFilm);
+
+    [].concat(
+      this._filmPresenter.get(updatedFilm.id),
+      this._filmTopRatedPresenter.get(updatedFilm.id),
+      this._filmMostCommentedPresenter.get(updatedFilm.id),
+    ).forEach((presenter) => presenter && presenter.init(updatedFilm, this._comments[updatedFilm.id]));
+  }
+
+  _handlePopupStateChange() {
+    [].concat(
+      ...this._filmPresenter.values(),
+      ...this._filmTopRatedPresenter.values(),
+      ...this._filmMostCommentedPresenter.values(),
+    ).forEach((presenter) => presenter.closePopup());
   }
 }
