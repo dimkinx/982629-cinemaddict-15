@@ -53,11 +53,13 @@ export default class FilmPresenter {
 
   destroy() {
     remove(this._filmComponent);
-    remove(this._filmDetailsComponent);
+    this.closePopup();
   }
 
   closePopup() {
-    this._isPopupOpen && this._handleCloseFilmDetailsClick();
+    if (this._isPopupOpen) {
+      this._handleCloseFilmDetailsClick();
+    }
   }
 
   _initFilmDetails() {

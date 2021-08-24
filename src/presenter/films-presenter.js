@@ -3,15 +3,15 @@ import FilmsView from '../view/films-view';
 import FilmsExtraView from '../view/films-extra-view';
 import ShowMoreButtonView from '../view/show-more-button-view';
 import FilmPresenter from './film-presenter';
-import {FILMS_COUNT_PER_STEP} from '../const';
-import {RenderPlace, FilterList, SortList, ExtraList} from '../types';
+import {FILMS_COUNT_PER_STEP, FILMS_EXTRA_COUNT} from '../const';
+import {RenderPlace, FilterList, SortType, ExtraList} from '../types';
 import {render, update, remove} from '../utils/dom-utils';
 
 export default class FilmsPresenter {
   constructor(mainContainer) {
     this._mainContainer = mainContainer;
     this._renderedFilmCount = FILMS_COUNT_PER_STEP;
-    this._currentSortType = SortList.DEFAULT.type;
+    this._currentSortType = SortType.DEFAULT.name;
 
     this._filmPresenter = new Map();
     this._filmTopRatedPresenter = new Map();
@@ -29,7 +29,7 @@ export default class FilmsPresenter {
   init(films, comments) {
     this._films = films.slice();
     this._filmsLength = this._films.length;
-    this._sourcedFilms = films.slice();
+    this._sortedFilms = films.slice();
     this._comments = comments.slice();
     this._filmsComponent = new FilmsView(this._filmsLength, FilterList.ALL_MOVIES.title);
     this._filmListContainerElement = this._filmsComponent.getElement().querySelector('.films-list__container');
@@ -50,7 +50,7 @@ export default class FilmsPresenter {
   }
 
   _renderFilmsBatch(renderedFilmCount = 0) {
-    this._films
+    this._sortedFilms
       .slice(renderedFilmCount, Math.min(this._filmsLength, renderedFilmCount + FILMS_COUNT_PER_STEP))
       .forEach((film) => this._renderFilm(this._filmListContainerElement, film));
 
@@ -67,8 +67,11 @@ export default class FilmsPresenter {
   _renderFilmsExtra() {
     Object
       .entries(ExtraList)
-      .forEach(([, {title, getFilms}]) => {
-        const sortedFilms = getFilms(this._films);
+      .forEach(([, {title, getProperty}]) => {
+        const sortedFilms = this._films
+          .filter((film) => getProperty(film) > 0)
+          .sort((first, second) => getProperty(second) - getProperty(first))
+          .slice(0, FILMS_EXTRA_COUNT);
 
         if (sortedFilms.length) {
           const filmsExtraComponent = new FilmsExtraView(title);
@@ -81,10 +84,16 @@ export default class FilmsPresenter {
   }
 
   _renderFilms() {
-    this._filmsLength && this._renderSort();
+    if (this._filmsLength) {
+      this._renderSort();
+    }
+
     render(this._mainContainer, this._filmsComponent);
-    this._filmsLength && this._renderFilmsBatch();
-    this._filmsLength && this._renderFilmsExtra();
+
+    if (this._filmsLength) {
+      this._renderFilmsBatch();
+      this._renderFilmsExtra();
+    }
   }
 
   _clearFilms() {
@@ -95,7 +104,7 @@ export default class FilmsPresenter {
   }
 
   _sortFilms(sortType) {
-    SortList[sortType.toUpperCase()].getFilms(this._films, this._sourcedFilms);
+    this._sortedFilms = SortType[sortType.toUpperCase()].getFilms(this._films);
     this._currentSortType = sortType;
   }
 
@@ -121,7 +130,7 @@ export default class FilmsPresenter {
 
   _handleFilmChange(updatedFilm) {
     this._films = update(this._films, updatedFilm);
-    this._sourcedFilms = update(this._sourcedFilms, updatedFilm);
+    this._sortedFilms = update(this._sortedFilms, updatedFilm);
 
     [].concat(
       this._filmPresenter.get(updatedFilm.id),

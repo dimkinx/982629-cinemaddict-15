@@ -1,4 +1,3 @@
-import {FILMS_EXTRA_COUNT} from './const';
 import {sortFilmsByDate} from './utils/date-time-utils';
 
 export const RenderPlace = {
@@ -6,24 +5,27 @@ export const RenderPlace = {
   AFTER_END: 'afterend',
 };
 
-const ProfileRank = {
-  NOVICE: 'novice',
-  FAN: 'fan',
-  MOVIE_BUFF: 'movie buff',
-};
-
-export const rankToRangeViewsCount = {
-  [ProfileRank.NOVICE]: {
-    min: 1,
-    max: 10,
+export const Rank = {
+  NOVICE: {
+    name: 'novice',
+    range: {
+      min: 1,
+      max: 10,
+    },
   },
-  [ProfileRank.FAN]: {
-    min: 11,
-    max: 20,
+  FAN: {
+    name: 'fan',
+    range: {
+      min: 11,
+      max: 20,
+    },
   },
-  [ProfileRank.MOVIE_BUFF]: {
-    min: 21,
-    max: Infinity,
+  MOVIE_BUFF: {
+    name: 'movie buff',
+    range: {
+      min: 21,
+      max: Infinity,
+    },
   },
 };
 
@@ -46,34 +48,28 @@ export const FilterList = {
   },
 };
 
-export const SortList = {
+export const SortType = {
   DEFAULT: {
-    type: 'default',
-    getFilms: (films, sourcedFilms) => Object.assign(films, sourcedFilms),
+    name: 'default',
+    getFilms: (films) => [...films],
   },
   DATE: {
-    type: 'date',
-    getFilms: (films) => films.sort(sortFilmsByDate),
+    name: 'date',
+    getFilms: (films) => [...films].sort(sortFilmsByDate),
   },
   RATING: {
-    type: 'rating',
-    getFilms: (films) => films.sort((first, second) => second.filmInfo.totalRating - first.filmInfo.totalRating),
+    name: 'rating',
+    getFilms: (films) => [...films].sort((first, second) => second.filmInfo.totalRating - first.filmInfo.totalRating),
   },
 };
 
 export const ExtraList = {
   TOP_RATED: {
     title: 'Top rated',
-    getFilms: (films) => films
-      .slice()
-      .sort((first, second) => second.filmInfo.totalRating - first.filmInfo.totalRating)
-      .slice(0, FILMS_EXTRA_COUNT),
+    getProperty: (film) => film.filmInfo.totalRating,
   },
   MOST_COMMENTED: {
     title: 'Most commented',
-    getFilms: (films) => films
-      .filter((film) => film.comments.length > 0)
-      .sort((first, second) => second.comments.length - first.comments.length)
-      .slice(0, FILMS_EXTRA_COUNT),
+    getProperty: (film) => film.comments.length,
   },
 };

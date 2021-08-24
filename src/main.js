@@ -5,7 +5,7 @@ import {generateFilm} from './mock/film';
 import {generateComment} from './mock/comment';
 import FilmsPresenter from './presenter/films-presenter';
 import {FILMS_COUNT} from './const';
-import {rankToRangeViewsCount} from './types';
+import {Rank} from './types';
 import {render} from './utils/dom-utils';
 
 const headerElement = document.querySelector('.header');
@@ -23,17 +23,21 @@ const getProfileRank = () => {
   let rank = '';
 
   Object
-    .entries(rankToRangeViewsCount)
-    .forEach(([key, value]) => (viewsCount >= value.min && viewsCount <= value.max) && (rank = key));
+    .entries(Rank)
+    .forEach(([, {name, range}]) => {
+      if (viewsCount >= range.min && viewsCount <= range.max) {
+        rank = name;
+      }
+    });
 
   return rank;
 };
 
-render(mainElement, new NavigationView(films));
-render(statisticsElement, new StatisticsView(films.length));
-
 if (films.length) {
   render(headerElement, new ProfileView(getProfileRank()));
 }
+
+render(mainElement, new NavigationView(films));
+render(statisticsElement, new StatisticsView(films.length));
 
 filmsPresenter.init(films, comments);

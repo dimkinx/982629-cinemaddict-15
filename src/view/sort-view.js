@@ -1,11 +1,11 @@
 import AbstractView from './abstract-view';
-import {SortList} from '../types';
+import {SortType} from '../types';
 
 const createSortTemplate = () => (
   `<ul class="sort">
-    <li><a href="#" class="sort__button sort__button--active" data-sort-type="${SortList.DEFAULT.type}">Sort by default</a></li>
-    <li><a href="#" class="sort__button" data-sort-type="${SortList.DATE.type}">Sort by date</a></li>
-    <li><a href="#" class="sort__button" data-sort-type="${SortList.RATING.type}">Sort by rating</a></li>
+    <li><a href="#" class="sort__button sort__button--active" data-sort-type="${SortType.DEFAULT.name}">Sort by default</a></li>
+    <li><a href="#" class="sort__button" data-sort-type="${SortType.DATE.name}">Sort by date</a></li>
+    <li><a href="#" class="sort__button" data-sort-type="${SortType.RATING.name}">Sort by rating</a></li>
   </ul>`
 );
 

@@ -93,7 +93,7 @@ const createFilmDetailsTemplate = (film, comments) => (
           <h3 class="film-details__comments-title">Comments <span class="film-details__comments-count">${comments.length}</span></h3>
 
           <ul class="film-details__comments-list">
-            ${sortCommentsByDate(comments).map((comment) => createCommentTemplate(comment)).join('\n')}
+            ${sortCommentsByDate(comments).map(createCommentTemplate).join('\n')}
           </ul>
 
           <div class="film-details__new-comment">
