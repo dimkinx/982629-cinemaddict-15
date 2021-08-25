@@ -11,9 +11,7 @@ export const getFormattedCommentDate = (date) => dayjs(date).isBetween(dayjs().s
   ? dayjs().to(dayjs(date))
   : dayjs(date).format('YYYY/MM/D HH:mm');
 
-export const sortCommentsByDate = (data) => data.sort((first, second) => dayjs(first.date).valueOf() - dayjs(second.date).valueOf());
-
-export const sortFilmsByDate = (first, second) => dayjs(second.filmInfo.release.date).diff(dayjs(first.filmInfo.release.date));
+export const convertDateToMs = (date) => dayjs(date).valueOf();
 
 export const getFormattedDuration = (duration) => {
   const hours = Math.trunc(duration / 60);

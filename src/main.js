@@ -1,5 +1,4 @@
 import ProfileView from './view/profile-view';
-import NavigationView from './view/navigation-view';
 import StatisticsView from './view/statistics-view';
 import {generateFilm} from './mock/film';
 import {generateComment} from './mock/comment';
@@ -37,7 +36,6 @@ if (films.length) {
   render(headerElement, new ProfileView(getProfileRank()));
 }
 
-render(mainElement, new NavigationView(films));
-render(statisticsElement, new StatisticsView(films.length));
-
 filmsPresenter.init(films, comments);
+
+render(statisticsElement, new StatisticsView(films.length));

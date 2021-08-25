@@ -18,10 +18,13 @@ export const render = (container, child, place = RenderPlace.BEFORE_END) => {
   }
 
   switch (place) {
-    case RenderPlace.BEFORE_END:
+    case (RenderPlace.AFTER_BEGIN):
+      container.prepend(child);
+      break;
+    case (RenderPlace.BEFORE_END):
       container.append(child);
       break;
-    case RenderPlace.AFTER_END:
+    case (RenderPlace.AFTER_END):
       container.after(child);
   }
 };

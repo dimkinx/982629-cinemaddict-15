@@ -1,6 +1,7 @@
-import {sortFilmsByDate} from './utils/date-time-utils';
+import {convertDateToMs} from './utils/date-time-utils';
 
 export const RenderPlace = {
+  AFTER_BEGIN: 'afterbegin',
   BEFORE_END: 'beforeend',
   AFTER_END: 'afterend',
 };
@@ -29,37 +30,41 @@ export const Rank = {
   },
 };
 
-export const FilterList = {
-  ALL_MOVIES: {
+export const FilterType = {
+  ALL: {
+    name: 'all',
     title: 'There are no movies in our database',
-    getFilms: () => {},
+    getProperty: (film) => !!film,
   },
   WATCHLIST: {
+    name: 'watchlist',
     title: 'There are no movies to watch now',
-    getFilms: () => {},
+    getProperty: (film) => film.userDetails.watchlist,
   },
   HISTORY: {
+    name: 'history',
     title: 'There are no watched movies now',
-    getFilms: () => {},
+    getProperty: (film) => film.userDetails.alreadyWatched,
   },
   FAVORITES: {
+    name: 'favorites',
     title: 'There are no favorite movies now',
-    getFilms: () => {},
+    getProperty: (film) => film.userDetails.favorite,
   },
 };
 
 export const SortType = {
   DEFAULT: {
     name: 'default',
-    getFilms: (films) => [...films],
+    getProperty: (film) => film,
   },
   DATE: {
     name: 'date',
-    getFilms: (films) => [...films].sort(sortFilmsByDate),
+    getProperty: (film) => convertDateToMs(film.filmInfo.release.date),
   },
   RATING: {
     name: 'rating',
-    getFilms: (films) => [...films].sort((first, second) => second.filmInfo.totalRating - first.filmInfo.totalRating),
+    getProperty: (film) => film.filmInfo.totalRating,
   },
 };
 
