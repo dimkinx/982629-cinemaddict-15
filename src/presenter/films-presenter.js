@@ -131,14 +131,11 @@ export default class FilmsPresenter {
   _sortFilms(sortType) {
     this._currentSortType = sortType;
 
-    if (SortType[sortType.toUpperCase()] === SortType.DEFAULT) {
-      this._sortedFilms = [...this._filteredFilms];
-      return;
-    }
-
-    this._sortedFilms = [...this._filteredFilms].sort((first, second) => (
-      SortType[sortType.toUpperCase()].getProperty(second) - SortType[sortType.toUpperCase()].getProperty(first)
-    ));
+    this._sortedFilms = (SortType[sortType.toUpperCase()] === SortType.DEFAULT)
+      ? [...this._filteredFilms]
+      : [...this._filteredFilms].sort((first, second) => (
+        SortType[sortType.toUpperCase()].getProperty(second) - SortType[sortType.toUpperCase()].getProperty(first)
+      ));
   }
 
   _renderFilmsBoard() {
