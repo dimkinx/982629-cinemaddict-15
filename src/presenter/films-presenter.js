@@ -125,17 +125,18 @@ export default class FilmsPresenter {
 
   _filterFilms(filterType) {
     this._currentFilterType = filterType;
-    this._filteredFilms = this._films.filter((film) => FilterType[filterType.toUpperCase()].getProperty(film));
+    this._filteredFilms = (FilterType[filterType.toUpperCase()] === FilterType.ALL)
+      ? this._films
+      : this._films.filter((film) => FilterType[filterType.toUpperCase()].getProperty(film));
   }
 
   _sortFilms(sortType) {
+    const getProperty = (film) => SortType[sortType.toUpperCase()].getProperty(film);
     this._currentSortType = sortType;
 
     this._sortedFilms = (SortType[sortType.toUpperCase()] === SortType.DEFAULT)
       ? [...this._filteredFilms]
-      : [...this._filteredFilms].sort((first, second) => (
-        SortType[sortType.toUpperCase()].getProperty(second) - SortType[sortType.toUpperCase()].getProperty(first)
-      ));
+      : [...this._filteredFilms].sort((first, second) => getProperty(second) - getProperty(first));
   }
 
   _renderFilmsBoard() {

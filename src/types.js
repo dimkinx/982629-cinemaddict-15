@@ -34,7 +34,6 @@ export const FilterType = {
   ALL: {
     name: 'all',
     title: 'There are no movies in our database',
-    getProperty: (film) => !!film,
   },
   WATCHLIST: {
     name: 'watchlist',
@@ -56,7 +55,6 @@ export const FilterType = {
 export const SortType = {
   DEFAULT: {
     name: 'default',
-    getProperty: (film) => film,
   },
   DATE: {
     name: 'date',
