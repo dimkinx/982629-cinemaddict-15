@@ -1,6 +1,11 @@
-import {getFormattedCommentDate, getFormattedDate, sortByDate, getFormattedDuration} from '../utils/date-time-utils';
-import {addActiveModifier} from '../utils/dom-utils';
 import AbstractView from './abstract-view';
+import {
+  convertDateToMs,
+  getFormattedCommentDate,
+  getFormattedDate,
+  getFormattedDuration
+} from '../utils/date-time-utils';
+import {addActiveModifier} from '../utils/dom-utils';
 
 const createCommentTemplate = (comment) => (
   `<li class="film-details__comment">
@@ -93,7 +98,7 @@ const createFilmDetailsTemplate = (film, comments) => (
           <h3 class="film-details__comments-title">Comments <span class="film-details__comments-count">${comments.length}</span></h3>
 
           <ul class="film-details__comments-list">
-            ${sortByDate(comments).map((comment) => createCommentTemplate(comment)).join('\n')}
+            ${comments.slice().sort((first, second) => (convertDateToMs(first.date) - convertDateToMs(second.date))).map(createCommentTemplate).join('\n')}
           </ul>
 
           <div class="film-details__new-comment">

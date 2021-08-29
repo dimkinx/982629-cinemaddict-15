@@ -1,6 +1,5 @@
 import AbstractView from './abstract-view';
-
-const REGEXP_ALL_FILMS_COUNT = /\B(?=(\d{3})+(?!\d))/g;
+import {REGEXP_ALL_FILMS_COUNT} from '../const';
 
 const createStatisticsTemplate = (filmsCount) => `<p>${filmsCount.toString().replace(REGEXP_ALL_FILMS_COUNT, ' ')} movies inside</p>`;
 

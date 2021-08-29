@@ -1,8 +1,7 @@
+import AbstractView from './abstract-view';
 import {getFormattedDate, getFormattedDuration} from '../utils/date-time-utils';
 import {addActiveModifier} from '../utils/dom-utils';
-import AbstractView from './abstract-view';
-
-const MAX_LENGTH_DESCRIPTION = 140;
+import {MAX_LENGTH_DESCRIPTION} from '../const';
 
 const trimText = (text, length = MAX_LENGTH_DESCRIPTION) => (text.length > length)
   ? text.slice(0, length - 1).concat('…')
