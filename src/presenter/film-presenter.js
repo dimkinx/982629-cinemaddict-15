@@ -43,8 +43,10 @@ export default class FilmPresenter {
     }
 
     if (this._isPopupOpen) {
+      const scrollPosition = prevFilmDetailsComponent.getElement().scrollTop;
       this._initFilmDetails();
       replace(this._filmDetailsComponent, prevFilmDetailsComponent);
+      this._filmDetailsComponent.getElement().scrollTop = scrollPosition;
     }
 
     remove(prevFilmComponent);
@@ -71,6 +73,10 @@ export default class FilmPresenter {
   }
 
   _handleOpenFilmDetailsClick() {
+    if (this._isPopupOpen) {
+      return;
+    }
+
     this._changePopupState();
 
     document.body.classList.add('hide-overflow');
