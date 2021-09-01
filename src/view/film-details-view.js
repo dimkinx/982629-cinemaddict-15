@@ -1,11 +1,7 @@
-import AbstractView from './abstract-view';
-import {
-  convertDateToMs,
-  getFormattedCommentDate,
-  getFormattedDate,
-  getFormattedDuration
-} from '../utils/date-time-utils';
+import SmartView from './smart-view';
+import {BLANK_COMMENT} from '../const';
 import {addActiveModifier} from '../utils/dom-utils';
+import {convertDateToMs, getFormattedCommentDate, getFormattedDate, getFormattedDuration} from '../utils/date-time-utils';
 
 const createCommentTemplate = (comment) => (
   `<li class="film-details__comment">
@@ -23,7 +19,12 @@ const createCommentTemplate = (comment) => (
   </li>`
 );
 
-const createFilmDetailsTemplate = (film, comments) => (
+const createEmotionTemplate = (emotion) => (
+  `<input name="emotion" type="hidden" value="${emotion}">
+  <img src="images/emoji/${emotion}.png" width="55" height="55" alt="emoji-${emotion}">`
+);
+
+const createFilmDetailsTemplate = (film, comments, {emotion, text}) => (
   `<section class="film-details">
     <form class="film-details__inner" action="" method="get">
       <div class="film-details__top-container">
@@ -102,10 +103,10 @@ const createFilmDetailsTemplate = (film, comments) => (
           </ul>
 
           <div class="film-details__new-comment">
-            <div class="film-details__add-emoji-label"></div>
+            <div class="film-details__add-emoji-label">${(emotion) ? createEmotionTemplate(emotion) : ''}</div>
 
             <label class="film-details__comment-label">
-              <textarea class="film-details__comment-input" placeholder="Select reaction below and write comment here" name="comment"></textarea>
+              <textarea class="film-details__comment-input" placeholder="Select reaction below and write comment here" name="comment">${text}</textarea>
             </label>
 
             <div class="film-details__emoji-list">
@@ -136,19 +137,25 @@ const createFilmDetailsTemplate = (film, comments) => (
   </section>`
 );
 
-export default class FilmDetailsView extends AbstractView {
-  constructor(film, comments) {
+export default class FilmDetailsView extends SmartView {
+  constructor(film, comments, newComment = BLANK_COMMENT) {
     super();
     this._film = film;
     this._comments = comments;
+    this._data = FilmDetailsView.parseNewCommentToData(newComment);
+
     this._closeFilmDetailsClickHandler = this._closeFilmDetailsClickHandler.bind(this);
     this._watchlistButtonClickHandler = this._watchlistButtonClickHandler.bind(this);
     this._watchedButtonClickHandler = this._watchedButtonClickHandler.bind(this);
     this._favoriteButtonClickHandler = this._favoriteButtonClickHandler.bind(this);
+    this._emotionChangeHandler = this._emotionChangeHandler.bind(this);
+    this._commentInputHandler = this._commentInputHandler.bind(this);
+
+    this._setInnerHandlers();
   }
 
   getTemplate() {
-    return createFilmDetailsTemplate(this._film, this._comments);
+    return createFilmDetailsTemplate(this._film, this._comments, this._data);
   }
 
   setCloseFilmDetailsClickHandler(callback) {
@@ -171,6 +178,20 @@ export default class FilmDetailsView extends AbstractView {
     this.getElement().querySelector('#favorite').addEventListener('click', this._favoriteButtonClickHandler);
   }
 
+  updateElement() {
+    const scrollPosition = this.getElement().scrollTop;
+    super.updateElement();
+    this.getElement().scrollTop = scrollPosition;
+  }
+
+  restoreHandlers() {
+    this.setCloseFilmDetailsClickHandler(this._callback.closeFilmDetailsClick);
+    this.setWatchlistButtonClickHandler(this._callback.watchlistButtonClick);
+    this.setWatchedButtonClickHandler(this._callback.watchedButtonClick);
+    this.setFavoriteButtonClickHandler(this._callback.favoriteButtonClick);
+    this._setInnerHandlers();
+  }
+
   _closeFilmDetailsClickHandler(evt) {
     evt.preventDefault();
     this._callback.closeFilmDetailsClick();
@@ -189,5 +210,35 @@ export default class FilmDetailsView extends AbstractView {
   _favoriteButtonClickHandler(evt) {
     evt.preventDefault();
     this._callback.favoriteButtonClick();
+  }
+
+  _setInnerHandlers() {
+    this.getElement().querySelector('.film-details__emoji-list').addEventListener('change', this._emotionChangeHandler);
+    this.getElement().querySelector('.film-details__comment-input').addEventListener('input', this._commentInputHandler);
+  }
+
+  _emotionChangeHandler(evt) {
+    evt.preventDefault();
+    this.updateData({
+      emotion: evt.target.value,
+    });
+  }
+
+  _commentInputHandler(evt) {
+    evt.preventDefault();
+    this.updateData({
+      text: evt.target.value,
+    }, true);
+  }
+
+  static parseNewCommentToData(newComment) {
+    return Object.assign(
+      {},
+      newComment,
+      {
+        emotion: newComment.emotion,
+        text: newComment.text,
+      },
+    );
   }
 }
