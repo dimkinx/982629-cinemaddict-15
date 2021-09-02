@@ -1,4 +1,4 @@
-import AbstractView from './abstract-view';
+import SmartView from './smart-view';
 import {getFormattedDate, getFormattedDuration} from '../utils/date-time-utils';
 import {addActiveModifier} from '../utils/dom-utils';
 import {MAX_LENGTH_DESCRIPTION} from '../const';
@@ -7,7 +7,7 @@ const trimText = (text, length = MAX_LENGTH_DESCRIPTION) => (text.length > lengt
   ? text.slice(0, length - 1).concat('…')
   : text;
 
-const createFilmCardTemplate = (film) => (
+const createFilmCardTemplate = ({film, state}) => (
   `<article class="film-card">
     <h3 class="film-card__title">${film.filmInfo.title}</h3>
     <p class="film-card__rating">${film.filmInfo.totalRating}</p>
@@ -20,25 +20,30 @@ const createFilmCardTemplate = (film) => (
     <p class="film-card__description">${trimText(film.filmInfo.description)}</p>
     <a class="film-card__comments">${film.comments.length} comments</a>
     <div class="film-card__controls">
-      <button class="${addActiveModifier(film.userDetails.watchlist, 'film-card__controls-item')} film-card__controls-item--add-to-watchlist" type="button">Add to watchlist</button>
-      <button class="${addActiveModifier(film.userDetails.alreadyWatched, 'film-card__controls-item')} film-card__controls-item--mark-as-watched" type="button">Mark as watched</button>
-      <button class="${addActiveModifier(film.userDetails.favorite, 'film-card__controls-item')} film-card__controls-item--favorite" type="button">Mark as favorite</button>
+      <button class="${addActiveModifier(state.hasInWatchlist, 'film-card__controls-item')} film-card__controls-item--add-to-watchlist" type="button">Add to watchlist</button>
+      <button class="${addActiveModifier(state.wasAlreadyWatched, 'film-card__controls-item')} film-card__controls-item--mark-as-watched" type="button">Mark as watched</button>
+      <button class="${addActiveModifier(state.isFavorite, 'film-card__controls-item')} film-card__controls-item--favorite" type="button">Mark as favorite</button>
     </div>
   </article>`
 );
 
-export default class FilmView extends AbstractView {
-  constructor(film) {
+export default class FilmView extends SmartView {
+  constructor(film, changeData) {
     super();
     this._film = film;
+    this._data = FilmView.parseFilmToData(this._film);
+    this._changeData = changeData;
+
     this._openFilmDetailsClickHandler = this._openFilmDetailsClickHandler.bind(this);
     this._watchlistButtonClickHandler = this._watchlistButtonClickHandler.bind(this);
     this._watchedButtonClickHandler = this._watchedButtonClickHandler.bind(this);
     this._favoriteButtonClickHandler = this._favoriteButtonClickHandler.bind(this);
+
+    this._setInnerHandlers();
   }
 
   getTemplate() {
-    return createFilmCardTemplate(this._film);
+    return createFilmCardTemplate(this._data);
   }
 
   setOpenFilmDetailsClickHandler(callback) {
@@ -48,18 +53,14 @@ export default class FilmView extends AbstractView {
     this.getElement().querySelector('.film-card__comments').addEventListener('click', this._openFilmDetailsClickHandler);
   }
 
-  setWatchlistButtonClickHandler(callback) {
-    this._callback.watchlistButtonClick = callback;
+  restoreHandlers() {
+    this.setOpenFilmDetailsClickHandler(this._callback.openFilmDetailsClick);
+    this._setInnerHandlers();
+  }
+
+  _setInnerHandlers() {
     this.getElement().querySelector('.film-card__controls-item--add-to-watchlist').addEventListener('click', this._watchlistButtonClickHandler);
-  }
-
-  setWatchedButtonClickHandler(callback) {
-    this._callback.watchedButtonClick = callback;
     this.getElement().querySelector('.film-card__controls-item--mark-as-watched').addEventListener('click', this._watchedButtonClickHandler);
-  }
-
-  setFavoriteButtonClickHandler(callback) {
-    this._callback.favoriteButtonClick = callback;
     this.getElement().querySelector('.film-card__controls-item--favorite').addEventListener('click', this._favoriteButtonClickHandler);
   }
 
@@ -70,16 +71,45 @@ export default class FilmView extends AbstractView {
 
   _watchlistButtonClickHandler(evt) {
     evt.preventDefault();
-    this._callback.watchlistButtonClick();
+    this.updateData({state: {...this._data.state, hasInWatchlist: !this._data.state.hasInWatchlist}});
+    this._changeData(FilmView.parseDataToFilm(this._data));
   }
 
   _watchedButtonClickHandler(evt) {
     evt.preventDefault();
-    this._callback.watchedButtonClick();
+    this.updateData({state: {...this._data.state, wasAlreadyWatched: !this._data.state.wasAlreadyWatched}});
+    this._changeData(FilmView.parseDataToFilm(this._data));
   }
 
   _favoriteButtonClickHandler(evt) {
     evt.preventDefault();
-    this._callback.favoriteButtonClick();
+    this.updateData({state: {...this._data.state, isFavorite: !this._data.state.isFavorite}});
+    this._changeData(FilmView.parseDataToFilm(this._data));
+
+  }
+
+  static parseFilmToData(film) {
+    return Object.assign(
+      {},
+      {film},
+      {state: {
+        hasInWatchlist: film.userDetails.watchlist,
+        wasAlreadyWatched: film.userDetails.alreadyWatched,
+        isFavorite: film.userDetails.favorite,
+      }},
+    );
+  }
+
+  static parseDataToFilm(data) {
+    return Object.assign(
+      {},
+      data.film,
+      {userDetails: {
+        ...data.film.userDetails,
+        watchlist: data.state.hasInWatchlist,
+        alreadyWatched: data.state.wasAlreadyWatched,
+        favorite: data.state.isFavorite,
+      }},
+    );
   }
 }
