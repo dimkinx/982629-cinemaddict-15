@@ -1,5 +1,4 @@
 import SmartView from './smart-view';
-import {BLANK_COMMENT} from '../const';
 import {addActiveModifier} from '../utils/dom-utils';
 import {convertDateToMs, getFormattedCommentDate, getFormattedDate, getFormattedDuration} from '../utils/date-time-utils';
 
@@ -24,7 +23,7 @@ const createEmotionTemplate = (emotion) => (
   <img src="images/emoji/${emotion}.png" width="55" height="55" alt="emoji-${emotion}">`
 );
 
-const createFilmDetailsTemplate = (film, comments, {emotion, text}) => (
+const createFilmDetailsTemplate = ({film, comments, state}) => (
   `<section class="film-details">
     <form class="film-details__inner" action="" method="get">
       <div class="film-details__top-container">
@@ -78,7 +77,7 @@ const createFilmDetailsTemplate = (film, comments, {emotion, text}) => (
               <tr class="film-details__row">
                 <td class="film-details__term">${(film.filmInfo.genre.length > 1) ? 'Genres' : 'Genre'}</td>
                 <td class="film-details__cell">
-                    ${film.filmInfo.genre.map((genre) => `<span class="film-details__genre">${genre}</span>`).join('\n')}
+                  ${film.filmInfo.genre.map((genre) => `<span class="film-details__genre">${genre}</span>`).join('\n')}
                 </td>
               </tr>
             </table>
@@ -88,9 +87,9 @@ const createFilmDetailsTemplate = (film, comments, {emotion, text}) => (
         </div>
 
         <section class="film-details__controls">
-          <button type="button" class="${addActiveModifier(film.userDetails.watchlist, 'film-details__control-button')} film-details__control-button--watchlist" id="watchlist" name="watchlist">Add to watchlist</button>
-          <button type="button" class="${addActiveModifier(film.userDetails.alreadyWatched, 'film-details__control-button')} film-details__control-button--watched" id="watched" name="watched">Already watched</button>
-          <button type="button" class="${addActiveModifier(film.userDetails.favorite, 'film-details__control-button')} film-details__control-button--favorite" id="favorite" name="favorite">Add to favorites</button>
+          <button type="button" class="${addActiveModifier(state.hasInWatchlist, 'film-details__control-button')} film-details__control-button--watchlist" id="watchlist" name="watchlist">Add to watchlist</button>
+          <button type="button" class="${addActiveModifier(state.wasAlreadyWatched, 'film-details__control-button')} film-details__control-button--watched" id="watched" name="watched">Already watched</button>
+          <button type="button" class="${addActiveModifier(state.isFavorite, 'film-details__control-button')} film-details__control-button--favorite" id="favorite" name="favorite">Add to favorites</button>
         </section>
       </div>
 
@@ -103,10 +102,10 @@ const createFilmDetailsTemplate = (film, comments, {emotion, text}) => (
           </ul>
 
           <div class="film-details__new-comment">
-            <div class="film-details__add-emoji-label">${(emotion) ? createEmotionTemplate(emotion) : ''}</div>
+            <div class="film-details__add-emoji-label">${(state.emotion) ? createEmotionTemplate(state.emotion) : ''}</div>
 
             <label class="film-details__comment-label">
-              <textarea class="film-details__comment-input" placeholder="Select reaction below and write comment here" name="comment">${text}</textarea>
+              <textarea class="film-details__comment-input" placeholder="Select reaction below and write comment here" name="comment">${state.text}</textarea>
             </label>
 
             <div class="film-details__emoji-list">
@@ -138,44 +137,31 @@ const createFilmDetailsTemplate = (film, comments, {emotion, text}) => (
 );
 
 export default class FilmDetailsView extends SmartView {
-  constructor(film, comments, newComment = BLANK_COMMENT) {
+  constructor(film, comments, changeData) {
     super();
     this._film = film;
     this._comments = comments;
-    this._data = FilmDetailsView.parseNewCommentToData(newComment);
+    this._newComment = {emotion: '', text: ''};
+    this._data = FilmDetailsView.parseFilmDetailsToData(this._film, this._comments, this._newComment);
+    this._changeData = changeData;
 
     this._closeFilmDetailsClickHandler = this._closeFilmDetailsClickHandler.bind(this);
     this._watchlistButtonClickHandler = this._watchlistButtonClickHandler.bind(this);
     this._watchedButtonClickHandler = this._watchedButtonClickHandler.bind(this);
     this._favoriteButtonClickHandler = this._favoriteButtonClickHandler.bind(this);
     this._emotionChangeHandler = this._emotionChangeHandler.bind(this);
-    this._commentInputHandler = this._commentInputHandler.bind(this);
+    this._newCommentInputHandler = this._newCommentInputHandler.bind(this);
 
     this._setInnerHandlers();
   }
 
   getTemplate() {
-    return createFilmDetailsTemplate(this._film, this._comments, this._data);
+    return createFilmDetailsTemplate(this._data);
   }
 
   setCloseFilmDetailsClickHandler(callback) {
     this._callback.closeFilmDetailsClick = callback;
     this.getElement().querySelector('.film-details__close-btn').addEventListener('click', this._closeFilmDetailsClickHandler);
-  }
-
-  setWatchlistButtonClickHandler(callback) {
-    this._callback.watchlistButtonClick = callback;
-    this.getElement().querySelector('#watchlist').addEventListener('click', this._watchlistButtonClickHandler);
-  }
-
-  setWatchedButtonClickHandler(callback) {
-    this._callback.watchedButtonClick = callback;
-    this.getElement().querySelector('#watched').addEventListener('click', this._watchedButtonClickHandler);
-  }
-
-  setFavoriteButtonClickHandler(callback) {
-    this._callback.favoriteButtonClick = callback;
-    this.getElement().querySelector('#favorite').addEventListener('click', this._favoriteButtonClickHandler);
   }
 
   updateElement() {
@@ -186,10 +172,15 @@ export default class FilmDetailsView extends SmartView {
 
   restoreHandlers() {
     this.setCloseFilmDetailsClickHandler(this._callback.closeFilmDetailsClick);
-    this.setWatchlistButtonClickHandler(this._callback.watchlistButtonClick);
-    this.setWatchedButtonClickHandler(this._callback.watchedButtonClick);
-    this.setFavoriteButtonClickHandler(this._callback.favoriteButtonClick);
     this._setInnerHandlers();
+  }
+
+  _setInnerHandlers() {
+    this.getElement().querySelector('#watchlist').addEventListener('click', this._watchlistButtonClickHandler);
+    this.getElement().querySelector('#watched').addEventListener('click', this._watchedButtonClickHandler);
+    this.getElement().querySelector('#favorite').addEventListener('click', this._favoriteButtonClickHandler);
+    this.getElement().querySelector('.film-details__emoji-list').addEventListener('change', this._emotionChangeHandler);
+    this.getElement().querySelector('.film-details__comment-input').addEventListener('input', this._newCommentInputHandler);
   }
 
   _closeFilmDetailsClickHandler(evt) {
@@ -199,45 +190,67 @@ export default class FilmDetailsView extends SmartView {
 
   _watchlistButtonClickHandler(evt) {
     evt.preventDefault();
-    this._callback.watchlistButtonClick();
+    this.updateData({state: {...this._data.state, hasInWatchlist: !this._data.state.hasInWatchlist}});
+    this._changeData(FilmDetailsView.parseDataToFilm(this._data));
   }
 
   _watchedButtonClickHandler(evt) {
     evt.preventDefault();
-    this._callback.watchedButtonClick();
+    this.updateData({state: {...this._data.state, wasAlreadyWatched: !this._data.state.wasAlreadyWatched}});
+    this._changeData(FilmDetailsView.parseDataToFilm(this._data));
   }
 
   _favoriteButtonClickHandler(evt) {
     evt.preventDefault();
-    this._callback.favoriteButtonClick();
-  }
-
-  _setInnerHandlers() {
-    this.getElement().querySelector('.film-details__emoji-list').addEventListener('change', this._emotionChangeHandler);
-    this.getElement().querySelector('.film-details__comment-input').addEventListener('input', this._commentInputHandler);
+    this.updateData({state: {...this._data.state, isFavorite: !this._data.state.isFavorite}});
+    this._changeData(FilmDetailsView.parseDataToFilm(this._data));
   }
 
   _emotionChangeHandler(evt) {
     evt.preventDefault();
-    this.updateData({
-      emotion: evt.target.value,
-    });
+    this.updateData({state: {...this._data.state, emotion: evt.target.value}});
   }
 
-  _commentInputHandler(evt) {
+  _newCommentInputHandler(evt) {
     evt.preventDefault();
-    this.updateData({
-      text: evt.target.value,
-    }, true);
+    this.updateData({state: {...this._data.state, text: evt.target.value}}, true);
   }
 
-  static parseNewCommentToData(newComment) {
+  static parseFilmDetailsToData(film, comments, newComment) {
     return Object.assign(
       {},
-      newComment,
-      {
+      {film},
+      {comments},
+      {newComment},
+      {state: {
+        hasInWatchlist: film.userDetails.watchlist,
+        wasAlreadyWatched: film.userDetails.alreadyWatched,
+        isFavorite: film.userDetails.favorite,
         emotion: newComment.emotion,
         text: newComment.text,
+      }},
+    );
+  }
+
+  static parseDataToFilm(data) {
+    return Object.assign(
+      {},
+      data.film,
+      {userDetails: {
+        ...data.film.userDetails,
+        watchlist: data.state.hasInWatchlist,
+        alreadyWatched: data.state.wasAlreadyWatched,
+        favorite: data.state.isFavorite,
+      }},
+    );
+  }
+
+  static parseDataToNewComment(data) {
+    return Object.assign(
+      {},
+      {
+        emotion: data.state.emotion,
+        text: data.state.text,
       },
     );
   }

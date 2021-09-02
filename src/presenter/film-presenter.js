@@ -24,8 +24,7 @@ export default class FilmPresenter {
     this._film = film;
     this._comments = comments;
 
-    const prevFilmComponent = this._filmComponent;
-    const prevFilmDetailsComponent = this._filmDetailsComponent;
+    const previous = this._filmComponent;
 
     this._filmComponent = new FilmView(this._film);
     this._filmComponent.setOpenFilmDetailsClickHandler(this._handleOpenFilmDetailsClick);
@@ -33,24 +32,16 @@ export default class FilmPresenter {
     this._filmComponent.setWatchedButtonClickHandler(this._handleWatchedButtonClick);
     this._filmComponent.setFavoriteButtonClickHandler(this._handleFavoriteButtonClick);
 
-    if (prevFilmComponent === null) {
+    if (previous === null) {
       render(this._filmListContainer, this._filmComponent);
       return;
     }
 
-    if (this._filmListContainer.contains(prevFilmComponent.getElement())) {
-      replace(this._filmComponent, prevFilmComponent);
+    if (this._filmListContainer.contains(previous.getElement())) {
+      replace(this._filmComponent, previous);
     }
 
-    if (this._isPopupOpen) {
-      const scrollPosition = prevFilmDetailsComponent.getElement().scrollTop;
-      this._initFilmDetails();
-      replace(this._filmDetailsComponent, prevFilmDetailsComponent);
-      this._filmDetailsComponent.getElement().scrollTop = scrollPosition;
-    }
-
-    remove(prevFilmComponent);
-    remove(prevFilmDetailsComponent);
+    remove(previous);
   }
 
   destroy() {
@@ -65,11 +56,8 @@ export default class FilmPresenter {
   }
 
   _initFilmDetails() {
-    this._filmDetailsComponent = new FilmDetailsView(this._film, this._comments);
+    this._filmDetailsComponent = new FilmDetailsView(this._film, this._comments, this._changeData);
     this._filmDetailsComponent.setCloseFilmDetailsClickHandler(this._handleCloseFilmDetailsClick);
-    this._filmDetailsComponent.setWatchlistButtonClickHandler(this._handleWatchlistButtonClick);
-    this._filmDetailsComponent.setWatchedButtonClickHandler(this._handleWatchedButtonClick);
-    this._filmDetailsComponent.setFavoriteButtonClickHandler(this._handleFavoriteButtonClick);
   }
 
   _handleOpenFilmDetailsClick() {
