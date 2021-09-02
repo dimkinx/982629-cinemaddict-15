@@ -14,9 +14,6 @@ export default class FilmPresenter {
 
     this._handleOpenFilmDetailsClick = this._handleOpenFilmDetailsClick.bind(this);
     this._handleCloseFilmDetailsClick = this._handleCloseFilmDetailsClick.bind(this);
-    this._handleWatchlistButtonClick = this._handleWatchlistButtonClick.bind(this);
-    this._handleWatchedButtonClick = this._handleWatchedButtonClick.bind(this);
-    this._handleFavoriteButtonClick = this._handleFavoriteButtonClick.bind(this);
     this._escKeyDownHandler = this._escKeyDownHandler.bind(this);
   }
 
@@ -27,11 +24,8 @@ export default class FilmPresenter {
     const prevFilmComponent = this._filmComponent;
     const prevFilmDetailsComponent = this._filmDetailsComponent;
 
-    this._filmComponent = new FilmView(this._film);
+    this._filmComponent = new FilmView(this._film, this._changeData);
     this._filmComponent.setOpenFilmDetailsClickHandler(this._handleOpenFilmDetailsClick);
-    this._filmComponent.setWatchlistButtonClickHandler(this._handleWatchlistButtonClick);
-    this._filmComponent.setWatchedButtonClickHandler(this._handleWatchedButtonClick);
-    this._filmComponent.setFavoriteButtonClickHandler(this._handleFavoriteButtonClick);
 
     if (prevFilmComponent === null) {
       render(this._filmListContainer, this._filmComponent);
@@ -43,8 +37,10 @@ export default class FilmPresenter {
     }
 
     if (this._isPopupOpen) {
+      const scrollPosition = prevFilmDetailsComponent.getElement().scrollTop;
       this._initFilmDetails();
       replace(this._filmDetailsComponent, prevFilmDetailsComponent);
+      this._filmDetailsComponent.getElement().scrollTop = scrollPosition;
     }
 
     remove(prevFilmComponent);
@@ -63,14 +59,15 @@ export default class FilmPresenter {
   }
 
   _initFilmDetails() {
-    this._filmDetailsComponent = new FilmDetailsView(this._film, this._comments);
+    this._filmDetailsComponent = new FilmDetailsView(this._film, this._comments, this._changeData);
     this._filmDetailsComponent.setCloseFilmDetailsClickHandler(this._handleCloseFilmDetailsClick);
-    this._filmDetailsComponent.setWatchlistButtonClickHandler(this._handleWatchlistButtonClick);
-    this._filmDetailsComponent.setWatchedButtonClickHandler(this._handleWatchedButtonClick);
-    this._filmDetailsComponent.setFavoriteButtonClickHandler(this._handleFavoriteButtonClick);
   }
 
   _handleOpenFilmDetailsClick() {
+    if (this._isPopupOpen) {
+      return;
+    }
+
     this._changePopupState();
 
     document.body.classList.add('hide-overflow');
@@ -87,27 +84,6 @@ export default class FilmPresenter {
 
     remove(this._filmDetailsComponent);
     this._isPopupOpen = false;
-  }
-
-  _handleWatchlistButtonClick() {
-    this._changeData(Object.assign({}, this._film, {userDetails: {
-      ...this._film.userDetails,
-      watchlist: !this._film.userDetails.watchlist,
-    }}));
-  }
-
-  _handleWatchedButtonClick() {
-    this._changeData(Object.assign({}, this._film, {userDetails: {
-      ...this._film.userDetails,
-      alreadyWatched: !this._film.userDetails.alreadyWatched,
-    }}));
-  }
-
-  _handleFavoriteButtonClick() {
-    this._changeData(Object.assign({}, this._film, {userDetails: {
-      ...this._film.userDetails,
-      favorite: !this._film.userDetails.favorite,
-    }}));
   }
 
   _escKeyDownHandler(evt) {

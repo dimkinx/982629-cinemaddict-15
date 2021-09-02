@@ -1,11 +1,6 @@
-import AbstractView from './abstract-view';
-import {
-  convertDateToMs,
-  getFormattedCommentDate,
-  getFormattedDate,
-  getFormattedDuration
-} from '../utils/date-time-utils';
+import SmartView from './smart-view';
 import {addActiveModifier} from '../utils/dom-utils';
+import {convertDateToMs, getFormattedCommentDate, getFormattedDate, getFormattedDuration} from '../utils/date-time-utils';
 
 const createCommentTemplate = (comment) => (
   `<li class="film-details__comment">
@@ -23,7 +18,12 @@ const createCommentTemplate = (comment) => (
   </li>`
 );
 
-const createFilmDetailsTemplate = (film, comments) => (
+const createEmotionTemplate = (emotion) => (
+  `<input name="emotion" type="hidden" value="${emotion}">
+  <img src="images/emoji/${emotion}.png" width="55" height="55" alt="emoji-${emotion}">`
+);
+
+const createFilmDetailsTemplate = ({film, comments, state}) => (
   `<section class="film-details">
     <form class="film-details__inner" action="" method="get">
       <div class="film-details__top-container">
@@ -77,7 +77,7 @@ const createFilmDetailsTemplate = (film, comments) => (
               <tr class="film-details__row">
                 <td class="film-details__term">${(film.filmInfo.genre.length > 1) ? 'Genres' : 'Genre'}</td>
                 <td class="film-details__cell">
-                    ${film.filmInfo.genre.map((genre) => `<span class="film-details__genre">${genre}</span>`).join('\n')}
+                  ${film.filmInfo.genre.map((genre) => `<span class="film-details__genre">${genre}</span>`).join('\n')}
                 </td>
               </tr>
             </table>
@@ -87,9 +87,9 @@ const createFilmDetailsTemplate = (film, comments) => (
         </div>
 
         <section class="film-details__controls">
-          <button type="button" class="${addActiveModifier(film.userDetails.watchlist, 'film-details__control-button')} film-details__control-button--watchlist" id="watchlist" name="watchlist">Add to watchlist</button>
-          <button type="button" class="${addActiveModifier(film.userDetails.alreadyWatched, 'film-details__control-button')} film-details__control-button--watched" id="watched" name="watched">Already watched</button>
-          <button type="button" class="${addActiveModifier(film.userDetails.favorite, 'film-details__control-button')} film-details__control-button--favorite" id="favorite" name="favorite">Add to favorites</button>
+          <button type="button" class="${addActiveModifier(state.hasInWatchlist, 'film-details__control-button')} film-details__control-button--watchlist" id="watchlist" name="watchlist">Add to watchlist</button>
+          <button type="button" class="${addActiveModifier(state.wasAlreadyWatched, 'film-details__control-button')} film-details__control-button--watched" id="watched" name="watched">Already watched</button>
+          <button type="button" class="${addActiveModifier(state.isFavorite, 'film-details__control-button')} film-details__control-button--favorite" id="favorite" name="favorite">Add to favorites</button>
         </section>
       </div>
 
@@ -102,10 +102,10 @@ const createFilmDetailsTemplate = (film, comments) => (
           </ul>
 
           <div class="film-details__new-comment">
-            <div class="film-details__add-emoji-label"></div>
+            <div class="film-details__add-emoji-label">${(state.emotion) ? createEmotionTemplate(state.emotion) : ''}</div>
 
             <label class="film-details__comment-label">
-              <textarea class="film-details__comment-input" placeholder="Select reaction below and write comment here" name="comment"></textarea>
+              <textarea class="film-details__comment-input" placeholder="Select reaction below and write comment here" name="comment">${state.text}</textarea>
             </label>
 
             <div class="film-details__emoji-list">
@@ -136,19 +136,27 @@ const createFilmDetailsTemplate = (film, comments) => (
   </section>`
 );
 
-export default class FilmDetailsView extends AbstractView {
-  constructor(film, comments) {
+export default class FilmDetailsView extends SmartView {
+  constructor(film, comments, changeData) {
     super();
     this._film = film;
     this._comments = comments;
+    this._newComment = {emotion: '', text: ''};
+    this._data = FilmDetailsView.parseFilmDetailsToData(this._film, this._comments, this._newComment);
+    this._changeData = changeData;
+
     this._closeFilmDetailsClickHandler = this._closeFilmDetailsClickHandler.bind(this);
     this._watchlistButtonClickHandler = this._watchlistButtonClickHandler.bind(this);
     this._watchedButtonClickHandler = this._watchedButtonClickHandler.bind(this);
     this._favoriteButtonClickHandler = this._favoriteButtonClickHandler.bind(this);
+    this._emotionChangeHandler = this._emotionChangeHandler.bind(this);
+    this._newCommentInputHandler = this._newCommentInputHandler.bind(this);
+
+    this._setInnerHandlers();
   }
 
   getTemplate() {
-    return createFilmDetailsTemplate(this._film, this._comments);
+    return createFilmDetailsTemplate(this._data);
   }
 
   setCloseFilmDetailsClickHandler(callback) {
@@ -156,19 +164,23 @@ export default class FilmDetailsView extends AbstractView {
     this.getElement().querySelector('.film-details__close-btn').addEventListener('click', this._closeFilmDetailsClickHandler);
   }
 
-  setWatchlistButtonClickHandler(callback) {
-    this._callback.watchlistButtonClick = callback;
+  updateElement() {
+    const scrollPosition = this.getElement().scrollTop;
+    super.updateElement();
+    this.getElement().scrollTop = scrollPosition;
+  }
+
+  restoreHandlers() {
+    this.setCloseFilmDetailsClickHandler(this._callback.closeFilmDetailsClick);
+    this._setInnerHandlers();
+  }
+
+  _setInnerHandlers() {
     this.getElement().querySelector('#watchlist').addEventListener('click', this._watchlistButtonClickHandler);
-  }
-
-  setWatchedButtonClickHandler(callback) {
-    this._callback.watchedButtonClick = callback;
     this.getElement().querySelector('#watched').addEventListener('click', this._watchedButtonClickHandler);
-  }
-
-  setFavoriteButtonClickHandler(callback) {
-    this._callback.favoriteButtonClick = callback;
     this.getElement().querySelector('#favorite').addEventListener('click', this._favoriteButtonClickHandler);
+    this.getElement().querySelector('.film-details__emoji-list').addEventListener('change', this._emotionChangeHandler);
+    this.getElement().querySelector('.film-details__comment-input').addEventListener('input', this._newCommentInputHandler);
   }
 
   _closeFilmDetailsClickHandler(evt) {
@@ -178,16 +190,68 @@ export default class FilmDetailsView extends AbstractView {
 
   _watchlistButtonClickHandler(evt) {
     evt.preventDefault();
-    this._callback.watchlistButtonClick();
+    this.updateData({state: {...this._data.state, hasInWatchlist: !this._data.state.hasInWatchlist}});
+    this._changeData(FilmDetailsView.parseDataToFilm(this._data));
   }
 
   _watchedButtonClickHandler(evt) {
     evt.preventDefault();
-    this._callback.watchedButtonClick();
+    this.updateData({state: {...this._data.state, wasAlreadyWatched: !this._data.state.wasAlreadyWatched}});
+    this._changeData(FilmDetailsView.parseDataToFilm(this._data));
   }
 
   _favoriteButtonClickHandler(evt) {
     evt.preventDefault();
-    this._callback.favoriteButtonClick();
+    this.updateData({state: {...this._data.state, isFavorite: !this._data.state.isFavorite}});
+    this._changeData(FilmDetailsView.parseDataToFilm(this._data));
+  }
+
+  _emotionChangeHandler(evt) {
+    evt.preventDefault();
+    this.updateData({state: {...this._data.state, emotion: evt.target.value}});
+  }
+
+  _newCommentInputHandler(evt) {
+    evt.preventDefault();
+    this.updateData({state: {...this._data.state, text: evt.target.value}}, true);
+  }
+
+  static parseFilmDetailsToData(film, comments, newComment) {
+    return Object.assign(
+      {},
+      {film},
+      {comments},
+      {newComment},
+      {state: {
+        hasInWatchlist: film.userDetails.watchlist,
+        wasAlreadyWatched: film.userDetails.alreadyWatched,
+        isFavorite: film.userDetails.favorite,
+        emotion: newComment.emotion,
+        text: newComment.text,
+      }},
+    );
+  }
+
+  static parseDataToFilm(data) {
+    return Object.assign(
+      {},
+      data.film,
+      {userDetails: {
+        ...data.film.userDetails,
+        watchlist: data.state.hasInWatchlist,
+        alreadyWatched: data.state.wasAlreadyWatched,
+        favorite: data.state.isFavorite,
+      }},
+    );
+  }
+
+  static parseDataToNewComment(data) {
+    return Object.assign(
+      {},
+      {
+        emotion: data.state.emotion,
+        text: data.state.text,
+      },
+    );
   }
 }
