@@ -1,21 +1,16 @@
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
-import isBetween from 'dayjs/plugin/isBetween';
+import duration from 'dayjs/plugin/duration';
 
 dayjs.extend(relativeTime);
-dayjs.extend(isBetween);
-
-export const getFormattedDate = (date, template) => dayjs(date).format(template);
-
-export const getFormattedCommentDate = (date) => dayjs(date).isBetween(dayjs().subtract(3, 'day'), dayjs())
-  ? dayjs().to(dayjs(date))
-  : dayjs(date).format('YYYY/MM/D HH:mm');
+dayjs.extend(duration);
 
 export const convertDateToMs = (date) => dayjs(date).valueOf();
 
-export const getFormattedDuration = (duration) => {
-  const hours = Math.trunc(duration / 60);
-  const minutes = duration % 60;
+export const getFormattedDate = (date, template) => dayjs(date).format(template);
 
-  return `${(hours) ? String(hours).concat('h ') : ''}${minutes}m`;
-};
+export const getFormattedCommentDate = (date) => dayjs(date).fromNow();
+
+export const getFormattedDuration = (time) => dayjs
+  .duration(time, 'minutes')
+  .format(`${(Math.trunc(time / 60)) ? 'H[h] ' : ''}mm[m]`);
