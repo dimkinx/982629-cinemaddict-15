@@ -1,16 +1,13 @@
 import AbstractView from './abstract-view';
 import {FilterType} from '../types';
 
-const createNavigationTemplate = (films) => (
-  `<nav class="main-navigation">
-    <div class="main-navigation__items">
-      <a href="#all" class="main-navigation__item main-navigation__item--active" data-filter-type="${FilterType.ALL.name}">All movies</a>
-      <a href="#watchlist" class="main-navigation__item" data-filter-type="${FilterType.WATCHLIST.name}">Watchlist <span class="main-navigation__item-count">${films.filter(FilterType.WATCHLIST.getProperty).length}</span></a>
-      <a href="#history" class="main-navigation__item" data-filter-type="${FilterType.HISTORY.name}">History <span class="main-navigation__item-count">${films.filter(FilterType.HISTORY.getProperty).length}</span></a>
-      <a href="#favorites" class="main-navigation__item" data-filter-type="${FilterType.FAVORITES.name}">Favorites <span class="main-navigation__item-count">${films.filter(FilterType.FAVORITES.getProperty).length}</span></a>
-    </div>
-    <a href="#stats" class="main-navigation__additional">Stats</a>
-  </nav>`
+const createFilterTemplate = (films) => (
+  `<div class="main-navigation__items">
+    <a href="#all" class="main-navigation__item main-navigation__item--active" data-filter-type="${FilterType.ALL.name}">All movies</a>
+    <a href="#watchlist" class="main-navigation__item" data-filter-type="${FilterType.WATCHLIST.name}">Watchlist <span class="main-navigation__item-count">${films.filter(FilterType.WATCHLIST.getProperty).length}</span></a>
+    <a href="#history" class="main-navigation__item" data-filter-type="${FilterType.HISTORY.name}">History <span class="main-navigation__item-count">${films.filter(FilterType.HISTORY.getProperty).length}</span></a>
+    <a href="#favorites" class="main-navigation__item" data-filter-type="${FilterType.FAVORITES.name}">Favorites <span class="main-navigation__item-count">${films.filter(FilterType.FAVORITES.getProperty).length}</span></a>
+  </div>`
 );
 
 export default class FilterView extends AbstractView {
@@ -22,12 +19,12 @@ export default class FilterView extends AbstractView {
   }
 
   getTemplate() {
-    return createNavigationTemplate(this._films);
+    return createFilterTemplate(this._films);
   }
 
   setFilterTypeChangeHandler(callback) {
     this._callback.filterTypeChange = callback;
-    this.getElement().querySelector('.main-navigation__items').addEventListener('click', this._filterTypeChangeHandler);
+    this.getElement().addEventListener('click', this._filterTypeChangeHandler);
   }
 
   _filterTypeChangeHandler(evt) {

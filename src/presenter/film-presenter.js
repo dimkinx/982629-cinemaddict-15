@@ -49,7 +49,6 @@ export default class FilmPresenter {
 
   destroy() {
     remove(this._filmComponent);
-    this.closePopup();
   }
 
   closePopup() {

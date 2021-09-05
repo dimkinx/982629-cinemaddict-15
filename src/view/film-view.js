@@ -2,6 +2,7 @@ import SmartView from './smart-view';
 import {getFormattedDate, getFormattedDuration} from '../utils/date-time-utils';
 import {addActiveModifier} from '../utils/dom-utils';
 import {MAX_LENGTH_DESCRIPTION} from '../const';
+import {UpdateType, UserAction} from '../types';
 
 const trimText = (text, length = MAX_LENGTH_DESCRIPTION) => (text.length > length)
   ? text.slice(0, length - 1).concat('…')
@@ -72,19 +73,31 @@ export default class FilmView extends SmartView {
   _watchlistButtonClickHandler(evt) {
     evt.preventDefault();
     this.updateData({state: {...this._data.state, hasInWatchlist: !this._data.state.hasInWatchlist}});
-    this._changeData(FilmView.parseDataToFilm(this._data));
+    this._changeData(
+      UserAction.UPDATE_FILM,
+      UpdateType.PATCH,
+      FilmView.parseDataToFilm(this._data),
+    );
   }
 
   _watchedButtonClickHandler(evt) {
     evt.preventDefault();
     this.updateData({state: {...this._data.state, wasAlreadyWatched: !this._data.state.wasAlreadyWatched}});
-    this._changeData(FilmView.parseDataToFilm(this._data));
+    this._changeData(
+      UserAction.UPDATE_FILM,
+      UpdateType.PATCH,
+      FilmView.parseDataToFilm(this._data),
+    );
   }
 
   _favoriteButtonClickHandler(evt) {
     evt.preventDefault();
     this.updateData({state: {...this._data.state, isFavorite: !this._data.state.isFavorite}});
-    this._changeData(FilmView.parseDataToFilm(this._data));
+    this._changeData(
+      UserAction.UPDATE_FILM,
+      UpdateType.PATCH,
+      FilmView.parseDataToFilm(this._data),
+    );
 
   }
 
