@@ -1,6 +1,7 @@
 import {convertDateToMs} from './utils/date-time-utils';
 
 export const RenderPlace = {
+  BEFORE_BEGIN: 'beforebegin',
   AFTER_BEGIN: 'afterbegin',
   BEFORE_END: 'beforeend',
   AFTER_END: 'afterend',
