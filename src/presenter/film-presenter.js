@@ -1,6 +1,7 @@
 import FilmView from '../view/film-view';
 import FilmDetailsView from '../view/film-details-view';
 import {render, replace, remove, isEscEvent} from '../utils/dom-utils';
+import {UpdateType, UserAction} from '../types';
 
 export default class FilmPresenter {
   constructor(filmListContainer, changeData, changePopupState) {
@@ -17,9 +18,10 @@ export default class FilmPresenter {
     this._escKeyDownHandler = this._escKeyDownHandler.bind(this);
   }
 
-  init(film, comments) {
+  init(film, comments, localComment) {
     this._film = film;
     this._comments = comments;
+    this._localComment = localComment;
 
     const prevFilmComponent = this._filmComponent;
     const prevFilmDetailsComponent = this._filmDetailsComponent;
@@ -38,7 +40,8 @@ export default class FilmPresenter {
 
     if (this._isPopupOpen) {
       const scrollPosition = prevFilmDetailsComponent.getElement().scrollTop;
-      this._initFilmDetails();
+      this._filmDetailsComponent = new FilmDetailsView(this._film, this._comments, this._changeData, this._localComment);
+      this._filmDetailsComponent.setCloseFilmDetailsClickHandler(this._handleCloseFilmDetailsClick);
       replace(this._filmDetailsComponent, prevFilmDetailsComponent);
       this._filmDetailsComponent.getElement().scrollTop = scrollPosition;
     }
@@ -57,11 +60,6 @@ export default class FilmPresenter {
     }
   }
 
-  _initFilmDetails() {
-    this._filmDetailsComponent = new FilmDetailsView(this._film, this._comments, this._changeData);
-    this._filmDetailsComponent.setCloseFilmDetailsClickHandler(this._handleCloseFilmDetailsClick);
-  }
-
   _handleOpenFilmDetailsClick() {
     if (this._isPopupOpen) {
       return;
@@ -72,7 +70,8 @@ export default class FilmPresenter {
     document.body.classList.add('hide-overflow');
     document.addEventListener('keydown', this._escKeyDownHandler);
 
-    this._initFilmDetails();
+    this._filmDetailsComponent = new FilmDetailsView(this._film, this._comments, this._changeData);
+    this._filmDetailsComponent.setCloseFilmDetailsClickHandler(this._handleCloseFilmDetailsClick);
     render(document.body, this._filmDetailsComponent);
     this._isPopupOpen = true;
   }
@@ -82,6 +81,7 @@ export default class FilmPresenter {
     document.removeEventListener('keydown', this._escKeyDownHandler);
 
     remove(this._filmDetailsComponent);
+    this._changeData(UserAction.UPDATE_LOCAL_COMMENT, UpdateType.PATCH, {emotion: '', text: ''});
     this._isPopupOpen = false;
   }
 

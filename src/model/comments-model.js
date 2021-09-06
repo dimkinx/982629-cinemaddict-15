@@ -4,6 +4,7 @@ export default class CommentsModel extends AbstractObserver {
   constructor() {
     super();
     this._comments = [];
+    this._localComment = {emotion: '', text: ''};
   }
 
   setComments(comments) {
@@ -12,6 +13,10 @@ export default class CommentsModel extends AbstractObserver {
 
   getComments() {
     return this._comments;
+  }
+
+  getLocalComments() {
+    return this._localComment;
   }
 
   addComment(updateType, update) {
@@ -36,5 +41,10 @@ export default class CommentsModel extends AbstractObserver {
     ];
 
     this._notify(updateType);
+  }
+
+  updateLocalComment(updateType, update) {
+    this._localComment = update;
+    this._notify(updateType, update);
   }
 }

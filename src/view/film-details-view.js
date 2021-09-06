@@ -88,9 +88,24 @@ const createFilmDetailsTemplate = ({film, comments, state}) => (
         </div>
 
         <section class="film-details__controls">
-          <button type="button" class="${addActiveModifier(state.hasInWatchlist, 'film-details__control-button')} film-details__control-button--watchlist" id="watchlist" name="watchlist">Add to watchlist</button>
-          <button type="button" class="${addActiveModifier(state.wasAlreadyWatched, 'film-details__control-button')} film-details__control-button--watched" id="watched" name="watched">Already watched</button>
-          <button type="button" class="${addActiveModifier(state.isFavorite, 'film-details__control-button')} film-details__control-button--favorite" id="favorite" name="favorite">Add to favorites</button>
+          <button
+            type="button"
+            class="${addActiveModifier(state.hasInWatchlist, 'film-details__control-button')} film-details__control-button--watchlist"
+            id="watchlist"
+            name="watchlist"
+          >Add to watchlist</button>
+          <button
+            type="button"
+            class="${addActiveModifier(state.wasAlreadyWatched, 'film-details__control-button')} film-details__control-button--watched"
+            id="watched"
+            name="watched"
+          >Already watched</button>
+          <button
+            type="button"
+            class="${addActiveModifier(state.isFavorite, 'film-details__control-button')} film-details__control-button--favorite"
+            id="favorite"
+            name="favorite"
+          >Add to favorites</button>
         </section>
       </div>
 
@@ -110,22 +125,50 @@ const createFilmDetailsTemplate = ({film, comments, state}) => (
             </label>
 
             <div class="film-details__emoji-list">
-              <input class="film-details__emoji-item visually-hidden" name="comment-emoji" type="radio" id="emoji-smile" value="smile">
+              <input
+                class="film-details__emoji-item visually-hidden"
+                name="comment-emoji"
+                type="radio"
+                id="emoji-smile"
+                value="smile"
+                ${(state.emotion === 'smile') ? 'checked' : ''}
+              >
               <label class="film-details__emoji-label" for="emoji-smile">
                 <img src="./images/emoji/smile.png" width="30" height="30" alt="emoji">
               </label>
 
-              <input class="film-details__emoji-item visually-hidden" name="comment-emoji" type="radio" id="emoji-sleeping" value="sleeping">
+              <input
+                class="film-details__emoji-item visually-hidden"
+                name="comment-emoji"
+                type="radio"
+                id="emoji-sleeping"
+                value="sleeping"
+                ${(state.emotion === 'sleeping') ? 'checked' : ''}
+              >
               <label class="film-details__emoji-label" for="emoji-sleeping">
                 <img src="./images/emoji/sleeping.png" width="30" height="30" alt="emoji">
               </label>
 
-              <input class="film-details__emoji-item visually-hidden" name="comment-emoji" type="radio" id="emoji-puke" value="puke">
+              <input
+                class="film-details__emoji-item visually-hidden"
+                name="comment-emoji"
+                type="radio"
+                id="emoji-puke"
+                value="puke"
+                ${(state.emotion === 'puke') ? 'checked' : ''}
+              >
               <label class="film-details__emoji-label" for="emoji-puke">
                 <img src="./images/emoji/puke.png" width="30" height="30" alt="emoji">
               </label>
 
-              <input class="film-details__emoji-item visually-hidden" name="comment-emoji" type="radio" id="emoji-angry" value="angry">
+              <input
+                class="film-details__emoji-item visually-hidden"
+                name="comment-emoji"
+                type="radio"
+                id="emoji-angry"
+                value="angry"
+                ${(state.emotion === 'angry') ? 'checked' : ''}
+              >
               <label class="film-details__emoji-label" for="emoji-angry">
                 <img src="./images/emoji/angry.png" width="30" height="30" alt="emoji">
               </label>
@@ -138,12 +181,12 @@ const createFilmDetailsTemplate = ({film, comments, state}) => (
 );
 
 export default class FilmDetailsView extends SmartView {
-  constructor(film, comments, changeData) {
+  constructor(film, comments, changeData, localComment = {emotion: '', text: ''}) {
     super();
     this._film = film;
     this._comments = comments;
-    this._newComment = {emotion: '', text: ''};
-    this._data = FilmDetailsView.parseFilmDetailsToData(this._film, this._comments, this._newComment);
+    this._localComment = localComment;
+    this._data = FilmDetailsView.parseFilmDetailsToData(this._film, this._comments, this._localComment);
     this._changeData = changeData;
 
     this._closeFilmDetailsClickHandler = this._closeFilmDetailsClickHandler.bind(this);
@@ -191,56 +234,46 @@ export default class FilmDetailsView extends SmartView {
 
   _watchlistButtonClickHandler(evt) {
     evt.preventDefault();
-    this.updateData({state: {...this._data.state, hasInWatchlist: !this._data.state.hasInWatchlist}});
-    this._changeData(
-      UserAction.UPDATE_FILM,
-      UpdateType.PATCH,
-      FilmDetailsView.parseDataToFilm(this._data),
-    );
+    this.updateData({state: {...this._data.state, hasInWatchlist: !this._data.state.hasInWatchlist}}, true);
+    this._changeData(UserAction.UPDATE_FILM, UpdateType.PATCH, FilmDetailsView.parseDataToFilm(this._data));
   }
 
   _watchedButtonClickHandler(evt) {
     evt.preventDefault();
-    this.updateData({state: {...this._data.state, wasAlreadyWatched: !this._data.state.wasAlreadyWatched}});
-    this._changeData(
-      UserAction.UPDATE_FILM,
-      UpdateType.PATCH,
-      FilmDetailsView.parseDataToFilm(this._data),
-    );
+    this.updateData({state: {...this._data.state, wasAlreadyWatched: !this._data.state.wasAlreadyWatched}}, true);
+    this._changeData(UserAction.UPDATE_FILM, UpdateType.PATCH, FilmDetailsView.parseDataToFilm(this._data));
   }
 
   _favoriteButtonClickHandler(evt) {
     evt.preventDefault();
-    this.updateData({state: {...this._data.state, isFavorite: !this._data.state.isFavorite}});
-    this._changeData(
-      UserAction.UPDATE_FILM,
-      UpdateType.PATCH,
-      FilmDetailsView.parseDataToFilm(this._data),
-    );
+    this.updateData({state: {...this._data.state, isFavorite: !this._data.state.isFavorite}}, true);
+    this._changeData(UserAction.UPDATE_FILM, UpdateType.PATCH, FilmDetailsView.parseDataToFilm(this._data));
   }
 
   _emotionChangeHandler(evt) {
     evt.preventDefault();
     this.updateData({state: {...this._data.state, emotion: evt.target.value}});
+    this._changeData(UserAction.UPDATE_LOCAL_COMMENT, UpdateType.PATCH, FilmDetailsView.parseDataToLocalComment(this._data));
   }
 
   _newCommentInputHandler(evt) {
     evt.preventDefault();
     this.updateData({state: {...this._data.state, text: evt.target.value}}, true);
+    this._changeData(UserAction.UPDATE_LOCAL_COMMENT, UpdateType.PATCH, FilmDetailsView.parseDataToLocalComment(this._data));
   }
 
-  static parseFilmDetailsToData(film, comments, newComment) {
+  static parseFilmDetailsToData(film, comments, localComment) {
     return Object.assign(
       {},
       {film},
       {comments},
-      {newComment},
+      {localComment},
       {state: {
         hasInWatchlist: film.userDetails.watchlist,
         wasAlreadyWatched: film.userDetails.alreadyWatched,
         isFavorite: film.userDetails.favorite,
-        emotion: newComment.emotion,
-        text: newComment.text,
+        emotion: localComment.emotion,
+        text: localComment.text,
       }},
     );
   }
@@ -258,7 +291,7 @@ export default class FilmDetailsView extends SmartView {
     );
   }
 
-  static parseDataToNewComment(data) {
+  static parseDataToLocalComment(data) {
     return Object.assign(
       {},
       {

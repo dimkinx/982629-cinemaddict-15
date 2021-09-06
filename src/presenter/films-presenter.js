@@ -64,7 +64,7 @@ export default class FilmsPresenter {
 
   _renderFilm(filmListContainer, film, type) {
     const filmPresenter = new FilmPresenter(filmListContainer, this._handleViewAction, this._handlePopupStateChange);
-    filmPresenter.init(film, this._commentsModel.getComments()[film.id]);
+    filmPresenter.init(film, this._commentsModel.getComments()[film.id], this._commentsModel.getLocalComments());
 
     type = (type) ? type.split(' ').map((subType) => `${subType[0].toUpperCase()}${subType.slice(1)}`).join('') : '';
 
@@ -121,20 +121,18 @@ export default class FilmsPresenter {
     }
   }
 
-  _clearFilmsBoard({resetRenderedFilmsCount = false, resetSortType = false} = {}) {
+  _clearFilmsBoard({isFilmsCountReset = false, isSortTypeReset = false} = {}) {
     this._filmPresenter.forEach((presenter) => presenter.destroy());
     this._filmPresenter.clear();
 
     remove(this._sortComponent);
     remove(this._showMoreButtonComponent);
 
-    if (resetRenderedFilmsCount) {
-      this._renderedTaskCount = FILMS_COUNT_PER_STEP;
-    } else {
-      this._renderedTaskCount = Math.min(this._getFilms().length, this._renderedTaskCount);
-    }
+    isFilmsCountReset
+      ? this._renderedTaskCount = FILMS_COUNT_PER_STEP
+      : this._renderedTaskCount = Math.min(this._getFilms().length, this._renderedTaskCount);
 
-    if (resetSortType) {
+    if (isSortTypeReset) {
       this._currentSortType = SortType.DEFAULT.name;
     }
   }
@@ -173,6 +171,9 @@ export default class FilmsPresenter {
       case UserAction.DELETE_COMMENT:
         this._commentsModel.deleteComment(updateType, update);
         break;
+      case UserAction.UPDATE_LOCAL_COMMENT:
+        this._commentsModel.updateLocalComment(updateType, update);
+        break;
     }
   }
 
@@ -183,14 +184,18 @@ export default class FilmsPresenter {
           this._filmPresenter.get(data.id),
           this._filmTopRatedPresenter.get(data.id),
           this._filmMostCommentedPresenter.get(data.id),
-        ).forEach((presenter) => presenter && presenter.init(data, this._commentsModel.getComments()[data.id]));
+        ).forEach((presenter) => presenter && presenter.init(
+          data,
+          this._commentsModel.getComments()[data.id],
+          this._commentsModel.getLocalComments(),
+        ));
         break;
       case UpdateType.MINOR:
         this._clearFilmsBoard();
         this._renderFilmsBoard();
         break;
       case UpdateType.MAJOR:
-        this._clearFilmsBoard({resetRenderedFilmsCount: true, resetSortType: true});
+        this._clearFilmsBoard({isFilmsCountReset: true, isSortTypeReset: true});
         this._renderFilmsBoard();
         break;
     }
