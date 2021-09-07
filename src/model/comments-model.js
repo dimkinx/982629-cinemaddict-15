@@ -1,14 +1,20 @@
 import AbstractObserver from '../utils/abstract-observer.js';
+import {LOCAL_COMMENT_DEFAULT} from '../const';
 
 export default class CommentsModel extends AbstractObserver {
   constructor() {
     super();
+    this._allComments = [];
     this._comments = [];
-    this._localComment = {emotion: '', text: ''};
+    this._localComment = LOCAL_COMMENT_DEFAULT;
   }
 
-  setComments(comments) {
-    this._comments = comments.slice();
+  setAllComments(allComments) {
+    this._allComments = allComments.slice();
+  }
+
+  setComments(filmId) {
+    this._comments = this._allComments[filmId].slice();
   }
 
   getComments() {
@@ -28,8 +34,8 @@ export default class CommentsModel extends AbstractObserver {
     this._notify(updateType, update);
   }
 
-  deleteComment(updateType, update) {
-    const index = this._comments.findIndex((comment) => comment.id === update.id);
+  deleteComment(updateType, commentId, updatedFilm) {
+    const index = this._comments.findIndex((comment) => comment.id === commentId);
 
     if (index === -1) {
       throw new Error('Can\'t delete unexisting comment');
@@ -40,11 +46,12 @@ export default class CommentsModel extends AbstractObserver {
       ...this._comments.slice(index + 1),
     ];
 
-    this._notify(updateType);
+    this._allComments[updatedFilm.id] = this._comments;
+
+    this._notify(updateType, updatedFilm);
   }
 
-  updateLocalComment(updateType, update) {
-    this._localComment = update;
-    this._notify(updateType, update);
+  updateLocalComment(updatedLocalComment = LOCAL_COMMENT_DEFAULT) {
+    this._localComment = updatedLocalComment;
   }
 }

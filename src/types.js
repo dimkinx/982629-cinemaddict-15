@@ -15,6 +15,7 @@ export const UserAction = {
 };
 
 export const UpdateType = {
+  JUST_UPDATE_DATA: 'JUST_UPDATE_DATA',
   PATCH: 'PATCH',
   MINOR: 'MINOR',
   MAJOR: 'MAJOR',

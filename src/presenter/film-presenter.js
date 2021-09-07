@@ -4,8 +4,9 @@ import {render, replace, remove, isEscEvent} from '../utils/dom-utils';
 import {UpdateType, UserAction} from '../types';
 
 export default class FilmPresenter {
-  constructor(filmListContainer, changeData, changePopupState) {
+  constructor(filmListContainer, commentsModel, changeData, changePopupState) {
     this._filmListContainer = filmListContainer;
+    this._commentsModel = commentsModel;
     this._changeData = changeData;
     this._changePopupState = changePopupState;
 
@@ -18,10 +19,10 @@ export default class FilmPresenter {
     this._escKeyDownHandler = this._escKeyDownHandler.bind(this);
   }
 
-  init(film, comments, localComment) {
+  init(film) {
     this._film = film;
-    this._comments = comments;
-    this._localComment = localComment;
+    this._comments = this._commentsModel.getComments();
+    this._localComment = this._commentsModel.getLocalComments();
 
     const prevFilmComponent = this._filmComponent;
     const prevFilmDetailsComponent = this._filmDetailsComponent;
@@ -52,6 +53,7 @@ export default class FilmPresenter {
 
   destroy() {
     remove(this._filmComponent);
+    this.closePopup();
   }
 
   closePopup() {
@@ -70,6 +72,9 @@ export default class FilmPresenter {
     document.body.classList.add('hide-overflow');
     document.addEventListener('keydown', this._escKeyDownHandler);
 
+    this._commentsModel.setComments(this._film.id);
+    this._comments = this._commentsModel.getComments();
+
     this._filmDetailsComponent = new FilmDetailsView(this._film, this._comments, this._changeData);
     this._filmDetailsComponent.setCloseFilmDetailsClickHandler(this._handleCloseFilmDetailsClick);
     render(document.body, this._filmDetailsComponent);
@@ -81,7 +86,7 @@ export default class FilmPresenter {
     document.removeEventListener('keydown', this._escKeyDownHandler);
 
     remove(this._filmDetailsComponent);
-    this._changeData(UserAction.UPDATE_LOCAL_COMMENT, UpdateType.PATCH, {emotion: '', text: ''});
+    this._changeData(UserAction.UPDATE_LOCAL_COMMENT, UpdateType.JUST_UPDATE_DATA);
     this._isPopupOpen = false;
   }
 

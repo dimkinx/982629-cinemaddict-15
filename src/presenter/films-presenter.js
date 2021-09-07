@@ -63,8 +63,8 @@ export default class FilmsPresenter {
   }
 
   _renderFilm(filmListContainer, film, type) {
-    const filmPresenter = new FilmPresenter(filmListContainer, this._handleViewAction, this._handlePopupStateChange);
-    filmPresenter.init(film, this._commentsModel.getComments()[film.id], this._commentsModel.getLocalComments());
+    const filmPresenter = new FilmPresenter(filmListContainer, this._commentsModel, this._handleViewAction, this._handlePopupStateChange);
+    filmPresenter.init(film);
 
     type = (type) ? type.split(' ').map((subType) => `${subType[0].toUpperCase()}${subType.slice(1)}`).join('') : '';
 
@@ -160,7 +160,7 @@ export default class FilmsPresenter {
     }
   }
 
-  _handleViewAction(actionType, updateType, update) {
+  _handleViewAction(actionType, updateType, update, updatedFilm) {
     switch (actionType) {
       case UserAction.UPDATE_FILM:
         this._filmsModel.updateFilm(updateType, update);
@@ -169,10 +169,10 @@ export default class FilmsPresenter {
         this._commentsModel.addComment(updateType, update);
         break;
       case UserAction.DELETE_COMMENT:
-        this._commentsModel.deleteComment(updateType, update);
+        this._commentsModel.deleteComment(updateType, update, updatedFilm);
         break;
       case UserAction.UPDATE_LOCAL_COMMENT:
-        this._commentsModel.updateLocalComment(updateType, update);
+        this._commentsModel.updateLocalComment(update);
         break;
     }
   }
@@ -184,18 +184,17 @@ export default class FilmsPresenter {
           this._filmPresenter.get(data.id),
           this._filmTopRatedPresenter.get(data.id),
           this._filmMostCommentedPresenter.get(data.id),
-        ).forEach((presenter) => presenter && presenter.init(
-          data,
-          this._commentsModel.getComments()[data.id],
-          this._commentsModel.getLocalComments(),
-        ));
+        ).forEach((presenter) => presenter && presenter.init(data));
         break;
       case UpdateType.MINOR:
         this._clearFilmsBoard();
         this._renderFilmsBoard();
         break;
       case UpdateType.MAJOR:
-        this._clearFilmsBoard({isFilmsCountReset: true, isSortTypeReset: true});
+        this._clearFilmsBoard({
+          isFilmsCountReset: true,
+          isSortTypeReset: true,
+        });
         this._renderFilmsBoard();
         break;
     }

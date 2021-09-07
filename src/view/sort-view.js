@@ -45,18 +45,6 @@ export default class SortView extends AbstractView {
     this.getElement().addEventListener('click', this._sortTypeChangeHandler);
   }
 
-  setDefaultActiveClass() {
-    this.getElement()
-      .querySelectorAll('.sort__button')
-      .forEach((element, index) => {
-        element.classList.remove('sort__button--active');
-
-        if (!index) {
-          element.classList.add('sort__button--active');
-        }
-      });
-  }
-
   _sortTypeChangeHandler(evt) {
     if (evt.target.tagName !== 'A') {
       return;

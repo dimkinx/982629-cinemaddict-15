@@ -17,7 +17,7 @@ const footerElement = document.querySelector('.footer');
 const statisticsElement = footerElement.querySelector('.footer__statistics');
 
 const films = new Array(FILMS_COUNT).fill(null).map((_, index) => generateFilm(index));
-const comments = films.map((film) => film.comments.map((id) => generateComment(id)));
+const allComments = films.map((film) => film.comments.map((id) => generateComment(id)));
 
 const filmsModel = new FilmsModel();
 const commentsModel = new CommentsModel();
@@ -40,7 +40,7 @@ const getProfileRank = () => {
 };
 
 filmsModel.setFilms(films);
-commentsModel.setComments(comments);
+commentsModel.setAllComments(allComments);
 
 if (films.length) {
   render(headerElement, new ProfileView(getProfileRank()));
