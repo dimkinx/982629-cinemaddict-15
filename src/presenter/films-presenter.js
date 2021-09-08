@@ -3,9 +3,10 @@ import FilmsView from '../view/films-view';
 import FilmsExtraView from '../view/films-extra-view';
 import ShowMoreButtonView from '../view/show-more-button-view';
 import FilmPresenter from './film-presenter';
-import {FILMS_COUNT_PER_STEP, FILMS_EXTRA_COUNT} from '../const';
-import {RenderPlace, FilterType, SortType, ExtraList, UserAction, UpdateType} from '../types';
 import {render, remove} from '../utils/dom-utils';
+import {applyCamelCase} from '../utils/text-formatting-utils';
+import {RenderPlace, FilterType, SortType, ExtraList, UserAction, UpdateType} from '../types';
+import {FILMS_COUNT_PER_STEP, FILMS_EXTRA_COUNT} from '../const';
 
 export default class FilmsPresenter {
   constructor(mainContainer, filmsModel, commentsModel) {
@@ -18,6 +19,7 @@ export default class FilmsPresenter {
     this._filmPresenter = new Map();
     this._filmTopRatedPresenter = new Map();
     this._filmMostCommentedPresenter = new Map();
+    this._filmsExtraComponent = new Map();
 
     this._sortComponent = null;
     this._showMoreButtonComponent = null;
@@ -65,33 +67,11 @@ export default class FilmsPresenter {
   _renderFilm(filmListContainer, film, type) {
     const filmPresenter = new FilmPresenter(filmListContainer, this._commentsModel, this._handleViewAction, this._handlePopupStateChange);
     filmPresenter.init(film);
-
-    type = (type) ? type.split(' ').map((subType) => `${subType[0].toUpperCase()}${subType.slice(1)}`).join('') : '';
-
-    this[`_film${type}Presenter`].set(film.id, filmPresenter);
+    this[`_film${(type) ? applyCamelCase(type) : ''}Presenter`].set(film.id, filmPresenter);
   }
 
   _renderFilms(films) {
     films.forEach((film) => this._renderFilm(this._filmListContainerElement, film));
-  }
-
-  _renderFilmsExtra() {
-    Object
-      .entries(ExtraList)
-      .forEach(([, {title, getProperty}]) => {
-        const sortedFilms = this._filmsModel.getFilms()
-          .slice()
-          .sort((first, second) => getProperty(second) - getProperty(first))
-          .slice(0, FILMS_EXTRA_COUNT);
-
-        if (sortedFilms.length) {
-          const filmsExtraComponent = new FilmsExtraView(title);
-          const filmListContainerElement = filmsExtraComponent.getElement().querySelector('.films-list__container');
-
-          render(this._filmsComponent, filmsExtraComponent);
-          sortedFilms.map((sortedFilm) => this._renderFilm(filmListContainerElement, sortedFilm, title));
-        }
-      });
   }
 
   _renderShowMoreButton() {
@@ -137,6 +117,43 @@ export default class FilmsPresenter {
     }
   }
 
+  _renderFilmsExtra() {
+    Object
+      .entries(ExtraList)
+      .forEach(([, {title, getProperty}]) => {
+        const sortedFilms = this._filmsModel.getFilms()
+          .filter((film) => getProperty(film) > 0)
+          .sort((first, second) => getProperty(second) - getProperty(first))
+          .slice(0, FILMS_EXTRA_COUNT);
+
+        if (sortedFilms.length) {
+          const newFilmsExtraComponent = new FilmsExtraView(title);
+          const filmListContainerElement = newFilmsExtraComponent.getElement().querySelector('.films-list__container');
+
+          render(this._filmsComponent, newFilmsExtraComponent);
+          sortedFilms.map((sortedFilm) => this._renderFilm(filmListContainerElement, sortedFilm, title));
+          this._filmsExtraComponent.set(`film${applyCamelCase(title)}Component`, newFilmsExtraComponent);
+        }
+      });
+  }
+
+  _updateAllFilms(updatedFilm) {
+    [].concat(
+      this._filmPresenter.get(updatedFilm.id),
+      this._filmTopRatedPresenter.get(updatedFilm.id),
+      this._filmMostCommentedPresenter.get(updatedFilm.id),
+    ).forEach((presenter) => presenter && presenter.init(updatedFilm));
+
+    if (updatedFilm.comments.length === 0) {
+      this._filmsExtraComponent.forEach((component) => remove(component));
+      this._filmsExtraComponent.clear();
+      this._filmTopRatedPresenter.clear();
+      this._filmMostCommentedPresenter.clear();
+      this._handleViewAction(UserAction.UPDATE_FILM, UpdateType.JUST_UPDATE_DATA, updatedFilm);
+      this._renderFilmsExtra();
+    }
+  }
+
   _handleSortTypeChange(sortType) {
     if (this._currentSortType === sortType) {
       return;
@@ -177,14 +194,10 @@ export default class FilmsPresenter {
     }
   }
 
-  _handleModelEvent(updateType, data) {
+  _handleModelEvent(updateType, updatedFilm) {
     switch (updateType) {
       case UpdateType.PATCH:
-        [].concat(
-          this._filmPresenter.get(data.id),
-          this._filmTopRatedPresenter.get(data.id),
-          this._filmMostCommentedPresenter.get(data.id),
-        ).forEach((presenter) => presenter && presenter.init(data));
+        this._updateAllFilms(updatedFilm);
         break;
       case UpdateType.MINOR:
         this._clearFilmsBoard();

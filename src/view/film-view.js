@@ -1,12 +1,8 @@
 import SmartView from './smart-view';
 import {getFormattedDate, getFormattedDuration} from '../utils/date-time-utils';
 import {addActiveModifier} from '../utils/dom-utils';
-import {MAX_LENGTH_DESCRIPTION} from '../const';
+import {trimText} from '../utils/text-formatting-utils';
 import {UpdateType, UserAction} from '../types';
-
-const trimText = (text, length = MAX_LENGTH_DESCRIPTION) => (text.length > length)
-  ? text.slice(0, length - 1).concat('…')
-  : text;
 
 const createFilmCardTemplate = ({film, state}) => (
   `<article class="film-card">

@@ -234,6 +234,7 @@ export default class FilmDetailsView extends SmartView {
 
   _closeFilmDetailsClickHandler(evt) {
     evt.preventDefault();
+    this._changeData(UserAction.UPDATE_LOCAL_COMMENT, UpdateType.JUST_UPDATE_DATA);
     this._callback.closeFilmDetailsClick();
   }
 

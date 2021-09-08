@@ -1,7 +1,6 @@
 import FilmView from '../view/film-view';
 import FilmDetailsView from '../view/film-details-view';
 import {render, replace, remove, isEscEvent} from '../utils/dom-utils';
-import {UpdateType, UserAction} from '../types';
 
 export default class FilmPresenter {
   constructor(filmListContainer, commentsModel, changeData, changePopupState) {
@@ -86,7 +85,6 @@ export default class FilmPresenter {
     document.removeEventListener('keydown', this._escKeyDownHandler);
 
     remove(this._filmDetailsComponent);
-    this._changeData(UserAction.UPDATE_LOCAL_COMMENT, UpdateType.JUST_UPDATE_DATA);
     this._isPopupOpen = false;
   }
 
