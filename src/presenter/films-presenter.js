@@ -3,6 +3,7 @@ import FilmsView from '../view/films-view';
 import FilmsExtraView from '../view/films-extra-view';
 import ShowMoreButtonView from '../view/show-more-button-view';
 import FilmPresenter from './film-presenter';
+import FilmDetailsPresenter from './film-details-presenter';
 import {render, remove} from '../utils/dom-utils';
 import {applyCamelCase} from '../utils/text-formatting-utils';
 import {RenderPlace, FilterType, SortType, ExtraList, UserAction, UpdateType} from '../types';
@@ -16,19 +17,21 @@ export default class FilmsPresenter {
     this._filmsCountToRender = FILMS_COUNT_PER_STEP;
     this._currentSortType = SortType.DEFAULT.name;
 
-    this._filmPresenter = new Map();
-    this._filmTopRatedPresenter = new Map();
-    this._filmMostCommentedPresenter = new Map();
-    this._filmsExtraComponent = new Map();
+    this._filmPresenters = new Map();
+    this._filmTopRatedPresenters = new Map();
+    this._filmMostCommentedPresenters = new Map();
+    this._filmsExtraComponents = new Map();
 
     this._sortComponent = null;
     this._showMoreButtonComponent = null;
+    this._filmDetailsPresenter = null;
 
     this._handleSortTypeChange = this._handleSortTypeChange.bind(this);
     this._handleShowMoreButtonClick = this._handleShowMoreButtonClick.bind(this);
+    this._handleFilmDetailsOpen = this._handleFilmDetailsOpen.bind(this);
+    this._handleFilmDetailsClose = this._handleFilmDetailsClose.bind(this);
     this._handleViewAction = this._handleViewAction.bind(this);
     this._handleModelEvent = this._handleModelEvent.bind(this);
-    this._handlePopupStateChange = this._handlePopupStateChange.bind(this);
 
     this._filmsModel.addObserver(this._handleModelEvent);
     this._commentsModel.addObserver(this._handleModelEvent);
@@ -65,9 +68,9 @@ export default class FilmsPresenter {
   }
 
   _renderFilm(filmListContainer, film, type) {
-    const filmPresenter = new FilmPresenter(filmListContainer, this._commentsModel, this._handleViewAction, this._handlePopupStateChange);
+    const filmPresenter = new FilmPresenter(filmListContainer, this._handleFilmDetailsOpen, this._handleViewAction);
     filmPresenter.init(film);
-    this[`_film${(type) ? applyCamelCase(type) : ''}Presenter`].set(film.id, filmPresenter);
+    this[`_film${(type) ? applyCamelCase(type) : ''}Presenters`].set(film.id, filmPresenter);
   }
 
   _renderFilms(films) {
@@ -102,8 +105,8 @@ export default class FilmsPresenter {
   }
 
   _clearFilmsBoard({isFilmsCountReset = false, isSortTypeReset = false} = {}) {
-    this._filmPresenter.forEach((presenter) => presenter.destroy());
-    this._filmPresenter.clear();
+    this._filmPresenters.forEach((presenter) => presenter.destroy());
+    this._filmPresenters.clear();
 
     remove(this._sortComponent);
     remove(this._showMoreButtonComponent);
@@ -132,26 +135,24 @@ export default class FilmsPresenter {
 
           render(this._filmsComponent, newFilmsExtraComponent);
           sortedFilms.map((sortedFilm) => this._renderFilm(filmListContainerElement, sortedFilm, title));
-          this._filmsExtraComponent.set(`film${applyCamelCase(title)}Component`, newFilmsExtraComponent);
+          this._filmsExtraComponents.set(`film${applyCamelCase(title)}Components`, newFilmsExtraComponent);
         }
       });
   }
 
+  _clearFilmsExtra() {
+    this._filmsExtraComponents.forEach((component) => remove(component));
+    this._filmsExtraComponents.clear();
+    this._filmTopRatedPresenters.clear();
+    this._filmMostCommentedPresenters.clear();
+  }
+
   _updateAllFilms(updatedFilm) {
     [].concat(
-      this._filmPresenter.get(updatedFilm.id),
-      this._filmTopRatedPresenter.get(updatedFilm.id),
-      this._filmMostCommentedPresenter.get(updatedFilm.id),
+      this._filmPresenters.get(updatedFilm.id),
+      this._filmTopRatedPresenters.get(updatedFilm.id),
+      this._filmMostCommentedPresenters.get(updatedFilm.id),
     ).forEach((presenter) => presenter && presenter.init(updatedFilm));
-
-    if (updatedFilm.comments.length === 0) {
-      this._filmsExtraComponent.forEach((component) => remove(component));
-      this._filmsExtraComponent.clear();
-      this._filmTopRatedPresenter.clear();
-      this._filmMostCommentedPresenter.clear();
-      this._handleViewAction(UserAction.UPDATE_FILM, UpdateType.JUST_UPDATE_DATA, updatedFilm);
-      this._renderFilmsExtra();
-    }
   }
 
   _handleSortTypeChange(sortType) {
@@ -177,6 +178,19 @@ export default class FilmsPresenter {
     }
   }
 
+  _handleFilmDetailsOpen(film) {
+    if (this._filmDetailsPresenter && this._filmDetailsPresenter.getFilmId !== film.id) {
+      this._filmDetailsPresenter.destroy();
+    }
+
+    this._filmDetailsPresenter = new FilmDetailsPresenter(this._commentsModel, this._handleFilmDetailsClose, this._handleViewAction);
+    this._filmDetailsPresenter.init(film);
+  }
+
+  _handleFilmDetailsClose() {
+    this._filmDetailsPresenter = null;
+  }
+
   _handleViewAction(actionType, updateType, update, updatedFilm) {
     switch (actionType) {
       case UserAction.UPDATE_FILM:
@@ -191,6 +205,9 @@ export default class FilmsPresenter {
       case UserAction.UPDATE_LOCAL_COMMENT:
         this._commentsModel.updateLocalComment(update);
         break;
+      case UserAction.RESET_LOCAL_COMMENT:
+        this._commentsModel.resetLocalComments();
+        break;
     }
   }
 
@@ -198,6 +215,12 @@ export default class FilmsPresenter {
     switch (updateType) {
       case UpdateType.PATCH:
         this._updateAllFilms(updatedFilm);
+        this._clearFilmsExtra();
+        this._renderFilmsExtra();
+
+        if (this._filmDetailsPresenter) {
+          this._filmDetailsPresenter.init(updatedFilm);
+        }
         break;
       case UpdateType.MINOR:
         this._clearFilmsBoard();
@@ -211,13 +234,5 @@ export default class FilmsPresenter {
         this._renderFilmsBoard();
         break;
     }
-  }
-
-  _handlePopupStateChange() {
-    [].concat(
-      ...this._filmPresenter.values(),
-      ...this._filmTopRatedPresenter.values(),
-      ...this._filmMostCommentedPresenter.values(),
-    ).forEach((presenter) => presenter.closePopup());
   }
 }

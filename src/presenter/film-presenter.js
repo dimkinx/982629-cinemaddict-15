@@ -1,97 +1,42 @@
 import FilmView from '../view/film-view';
-import FilmDetailsView from '../view/film-details-view';
-import {render, replace, remove, isEscEvent} from '../utils/dom-utils';
+import {render, replace, remove} from '../utils/dom-utils';
 
 export default class FilmPresenter {
-  constructor(filmListContainer, commentsModel, changeData, changePopupState) {
+  constructor(filmListContainer, openPopup, changeData) {
     this._filmListContainer = filmListContainer;
-    this._commentsModel = commentsModel;
+    this._openPopup = openPopup;
     this._changeData = changeData;
-    this._changePopupState = changePopupState;
 
     this._filmComponent = null;
-    this._filmDetailsComponent = null;
-    this._isPopupOpen = false;
 
-    this._handleOpenFilmDetailsClick = this._handleOpenFilmDetailsClick.bind(this);
-    this._handleCloseFilmDetailsClick = this._handleCloseFilmDetailsClick.bind(this);
-    this._escKeyDownHandler = this._escKeyDownHandler.bind(this);
+    this._handleOpenFilmDetails = this._handleOpenFilmDetails.bind(this);
   }
 
   init(film) {
     this._film = film;
-    this._comments = this._commentsModel.getComments();
-    this._localComment = this._commentsModel.getLocalComments();
 
-    const prevFilmComponent = this._filmComponent;
-    const prevFilmDetailsComponent = this._filmDetailsComponent;
-
+    const previous = this._filmComponent;
     this._filmComponent = new FilmView(this._film, this._changeData);
-    this._filmComponent.setOpenFilmDetailsClickHandler(this._handleOpenFilmDetailsClick);
+    this._filmComponent.setOpenFilmDetailsClickHandler(this._handleOpenFilmDetails);
 
-    if (prevFilmComponent === null) {
+    if (previous === null) {
       render(this._filmListContainer, this._filmComponent);
       return;
     }
 
-    if (this._filmListContainer.contains(prevFilmComponent.getElement())) {
-      replace(this._filmComponent, prevFilmComponent);
+    if (this._filmListContainer.contains(previous.getElement())) {
+      replace(this._filmComponent, previous);
     }
 
-    if (this._isPopupOpen) {
-      const scrollPosition = prevFilmDetailsComponent.getElement().scrollTop;
-      this._filmDetailsComponent = new FilmDetailsView(this._film, this._comments, this._changeData, this._localComment);
-      this._filmDetailsComponent.setCloseFilmDetailsClickHandler(this._handleCloseFilmDetailsClick);
-      replace(this._filmDetailsComponent, prevFilmDetailsComponent);
-      this._filmDetailsComponent.getElement().scrollTop = scrollPosition;
-    }
-
-    remove(prevFilmComponent);
-    remove(prevFilmDetailsComponent);
+    remove(previous);
   }
 
   destroy() {
     remove(this._filmComponent);
-    this.closePopup();
+    this._filmComponent = null;
   }
 
-  closePopup() {
-    if (this._isPopupOpen) {
-      this._handleCloseFilmDetailsClick();
-    }
-  }
-
-  _handleOpenFilmDetailsClick() {
-    if (this._isPopupOpen) {
-      return;
-    }
-
-    this._changePopupState();
-
-    document.body.classList.add('hide-overflow');
-    document.addEventListener('keydown', this._escKeyDownHandler);
-
-    this._commentsModel.setComments(this._film.id);
-    this._comments = this._commentsModel.getComments();
-
-    this._filmDetailsComponent = new FilmDetailsView(this._film, this._comments, this._changeData);
-    this._filmDetailsComponent.setCloseFilmDetailsClickHandler(this._handleCloseFilmDetailsClick);
-    render(document.body, this._filmDetailsComponent);
-    this._isPopupOpen = true;
-  }
-
-  _handleCloseFilmDetailsClick() {
-    document.body.classList.remove('hide-overflow');
-    document.removeEventListener('keydown', this._escKeyDownHandler);
-
-    remove(this._filmDetailsComponent);
-    this._isPopupOpen = false;
-  }
-
-  _escKeyDownHandler(evt) {
-    if (isEscEvent(evt)) {
-      evt.preventDefault();
-      this._handleCloseFilmDetailsClick();
-    }
+  _handleOpenFilmDetails() {
+    this._openPopup(this._film);
   }
 }

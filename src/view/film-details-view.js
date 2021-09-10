@@ -2,7 +2,6 @@ import SmartView from './smart-view';
 import {addActiveModifier} from '../utils/dom-utils';
 import {convertDateToMs, getFormattedCommentDate, getFormattedDate, getFormattedDuration} from '../utils/date-time-utils';
 import {UpdateType, UserAction} from '../types';
-import {LOCAL_COMMENT_DEFAULT} from '../const';
 
 const createCommentTemplate = (comment) => (
   `<li class="film-details__comment" data-comment-id="${comment.id}">
@@ -182,7 +181,7 @@ const createFilmDetailsTemplate = ({film, comments, state}) => (
 );
 
 export default class FilmDetailsView extends SmartView {
-  constructor(film, comments, changeData, localComment = LOCAL_COMMENT_DEFAULT) {
+  constructor(film, comments, localComment, changeData) {
     super();
     this._film = film;
     this._comments = comments;
@@ -234,7 +233,6 @@ export default class FilmDetailsView extends SmartView {
 
   _closeFilmDetailsClickHandler(evt) {
     evt.preventDefault();
-    this._changeData(UserAction.UPDATE_LOCAL_COMMENT, UpdateType.JUST_UPDATE_DATA);
     this._callback.closeFilmDetailsClick();
   }
 
@@ -277,6 +275,7 @@ export default class FilmDetailsView extends SmartView {
 
     evt.preventDefault();
     this.updateData({state: {...this._data.state, comments: this._data.state.comments.filter((id) => id !== +commentId)}}, true);
+    this._changeData(UserAction.UPDATE_FILM, UpdateType.PATCH, FilmDetailsView.parseDataToFilm(this._data));
     this._changeData(UserAction.DELETE_COMMENT, UpdateType.PATCH, commentId, FilmDetailsView.parseDataToFilm(this._data));
   }
 
