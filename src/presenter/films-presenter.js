@@ -10,10 +10,12 @@ import {RenderPlace, FilterType, SortType, ExtraList, UserAction, UpdateType} fr
 import {FILMS_COUNT_PER_STEP, FILMS_EXTRA_COUNT} from '../const';
 
 export default class FilmsPresenter {
-  constructor(mainContainer, filmsModel, commentsModel) {
+  constructor(mainContainer, filmsModel, commentsModel, filterModel) {
     this._mainContainer = mainContainer;
     this._filmsModel = filmsModel;
     this._commentsModel = commentsModel;
+    this._filterModel = filterModel;
+
     this._filmsCountToRender = FILMS_COUNT_PER_STEP;
     this._currentSortType = SortType.DEFAULT.name;
 
@@ -35,25 +37,37 @@ export default class FilmsPresenter {
 
     this._filmsModel.addObserver(this._handleModelEvent);
     this._commentsModel.addObserver(this._handleModelEvent);
+    this._filterModel.addObserver(this._handleModelEvent);
   }
 
   init() {
-    this._filmsComponent = new FilmsView(this._filmsModel.getFilms().length, FilterType.ALL.title);
+    this._filmsComponent = new FilmsView(this._getFilms().length, FilterType[this._filterModel.getFilter().toUpperCase()].title);
     this._filmListContainerElement = this._filmsComponent.getElement().querySelector('.films-list__container');
 
-    render(this._mainContainer, this._filmsComponent);
+    this._renderFilmsComponent();
     this._renderFilmsBoard();
     this._renderFilmsExtra();
   }
 
   _getFilms() {
     const films = this._filmsModel.getFilms();
+    const currentFilterType = this._filterModel.getFilter();
     const currentSortType = SortType[this._currentSortType.toUpperCase()];
-    const getProperty = (film) => currentSortType.getProperty(film);
+    const filteredFilms = (FilterType[currentFilterType.toUpperCase()] === FilterType.ALL)
+      ? films
+      : films.filter((film) => FilterType[currentFilterType.toUpperCase()].getProperty(film));
 
     return (currentSortType === SortType.DEFAULT)
-      ? films
-      : films.slice().sort((first, second) => getProperty(second) - getProperty(first));
+      ? filteredFilms
+      : filteredFilms.slice().sort((first, second) => currentSortType.getProperty(second) - currentSortType.getProperty(first));
+  }
+
+  _renderFilmsComponent() {
+    render(this._mainContainer, this._filmsComponent);
+  }
+
+  _clearFilmsComponent() {
+    remove(this._filmsComponent);
   }
 
   _renderSort() {
@@ -112,8 +126,8 @@ export default class FilmsPresenter {
     remove(this._showMoreButtonComponent);
 
     isFilmsCountReset
-      ? this._renderedTaskCount = FILMS_COUNT_PER_STEP
-      : this._renderedTaskCount = Math.min(this._getFilms().length, this._renderedTaskCount);
+      ? this._filmsCountToRender = FILMS_COUNT_PER_STEP
+      : this._filmsCountToRender = Math.min(this._getFilms().length, this._filmsCountToRender);
 
     if (isSortTypeReset) {
       this._currentSortType = SortType.DEFAULT.name;
@@ -223,15 +237,19 @@ export default class FilmsPresenter {
         }
         break;
       case UpdateType.MINOR:
+        this._clearFilmsComponent();
         this._clearFilmsBoard();
-        this._renderFilmsBoard();
+        this._clearFilmsExtra();
+        this.init();
         break;
       case UpdateType.MAJOR:
+        this._clearFilmsComponent();
         this._clearFilmsBoard({
           isFilmsCountReset: true,
           isSortTypeReset: true,
         });
-        this._renderFilmsBoard();
+        this._clearFilmsExtra();
+        this.init();
         break;
     }
   }

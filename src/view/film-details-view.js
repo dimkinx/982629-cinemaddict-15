@@ -239,19 +239,19 @@ export default class FilmDetailsView extends SmartView {
   _watchlistButtonClickHandler(evt) {
     evt.preventDefault();
     this.updateData({state: {...this._data.state, hasInWatchlist: !this._data.state.hasInWatchlist}}, true);
-    this._changeData(UserAction.UPDATE_FILM, UpdateType.PATCH, FilmDetailsView.parseDataToFilm(this._data));
+    this._changeData(UserAction.UPDATE_FILM, UpdateType.MINOR, FilmDetailsView.parseDataToFilm(this._data));
   }
 
   _watchedButtonClickHandler(evt) {
     evt.preventDefault();
     this.updateData({state: {...this._data.state, wasAlreadyWatched: !this._data.state.wasAlreadyWatched}}, true);
-    this._changeData(UserAction.UPDATE_FILM, UpdateType.PATCH, FilmDetailsView.parseDataToFilm(this._data));
+    this._changeData(UserAction.UPDATE_FILM, UpdateType.MINOR, FilmDetailsView.parseDataToFilm(this._data));
   }
 
   _favoriteButtonClickHandler(evt) {
     evt.preventDefault();
     this.updateData({state: {...this._data.state, isFavorite: !this._data.state.isFavorite}}, true);
-    this._changeData(UserAction.UPDATE_FILM, UpdateType.PATCH, FilmDetailsView.parseDataToFilm(this._data));
+    this._changeData(UserAction.UPDATE_FILM, UpdateType.MINOR, FilmDetailsView.parseDataToFilm(this._data));
   }
 
   _emotionChangeHandler(evt) {

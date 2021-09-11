@@ -1,8 +1,9 @@
 import AbstractView from './abstract-view';
+import {addActiveModifier} from '../utils/dom-utils';
 
-const createNavigationTemplate = () => (
+const createNavigationTemplate = (isTarget) => (
   `<nav class="main-navigation">
-    <a href="#stats" class="main-navigation__additional">Stats</a>
+    <a href="#stats" class="${addActiveModifier(isTarget, 'main-navigation__additional')}">Stats</a>
   </nav>`
 );
 

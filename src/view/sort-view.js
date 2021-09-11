@@ -1,6 +1,6 @@
 import AbstractView from './abstract-view';
-import {SortType} from '../types';
 import {addActiveModifier} from '../utils/dom-utils';
+import {SortType} from '../types';
 
 const createSortTemplate = (currentSortType) => (
   `<ul class="sort">
