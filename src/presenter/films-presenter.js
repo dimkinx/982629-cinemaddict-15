@@ -44,7 +44,7 @@ export default class FilmsPresenter {
     this._filmsComponent = new FilmsView(this._getFilms().length, FilterType[this._filterModel.getFilter().toUpperCase()].title);
     this._filmListContainerElement = this._filmsComponent.getElement().querySelector('.films-list__container');
 
-    this._renderFilmsComponent();
+    this._renderFilmsContainer();
     this._renderFilmsBoard();
     this._renderFilmsExtra();
   }
@@ -62,11 +62,11 @@ export default class FilmsPresenter {
       : filteredFilms.slice().sort((first, second) => currentSortType.getProperty(second) - currentSortType.getProperty(first));
   }
 
-  _renderFilmsComponent() {
+  _renderFilmsContainer() {
     render(this._mainContainer, this._filmsComponent);
   }
 
-  _clearFilmsComponent() {
+  _clearFilmsContainer() {
     remove(this._filmsComponent);
   }
 
@@ -124,6 +124,10 @@ export default class FilmsPresenter {
 
     remove(this._sortComponent);
     remove(this._showMoreButtonComponent);
+
+    if (this._getFilms().length === 1) {
+      this._filmsCountToRender = FILMS_COUNT_PER_STEP;
+    }
 
     isFilmsCountReset
       ? this._filmsCountToRender = FILMS_COUNT_PER_STEP
@@ -193,7 +197,11 @@ export default class FilmsPresenter {
   }
 
   _handleFilmDetailsOpen(film) {
-    if (this._filmDetailsPresenter && this._filmDetailsPresenter.getFilmId !== film.id) {
+    if (this._filmDetailsPresenter && this._filmDetailsPresenter.filmId === film.id) {
+      return;
+    }
+
+    if (this._filmDetailsPresenter) {
       this._filmDetailsPresenter.destroy();
     }
 
@@ -232,24 +240,29 @@ export default class FilmsPresenter {
         this._clearFilmsExtra();
         this._renderFilmsExtra();
 
-        if (this._filmDetailsPresenter) {
+        if (this._filmDetailsPresenter && this._filmDetailsPresenter.filmId === updatedFilm.id) {
           this._filmDetailsPresenter.init(updatedFilm);
         }
         break;
       case UpdateType.MINOR:
-        this._clearFilmsComponent();
+        this._clearFilmsContainer();
         this._clearFilmsBoard();
         this._clearFilmsExtra();
         this.init();
+
+        if (this._filmDetailsPresenter && this._filmDetailsPresenter.filmId === updatedFilm.id) {
+          this._filmDetailsPresenter.init(updatedFilm);
+        }
         break;
       case UpdateType.MAJOR:
-        this._clearFilmsComponent();
-        this._clearFilmsBoard({
-          isFilmsCountReset: true,
-          isSortTypeReset: true,
-        });
+        this._clearFilmsContainer();
+        this._clearFilmsBoard({isFilmsCountReset: true, isSortTypeReset: true});
         this._clearFilmsExtra();
         this.init();
+
+        if (this._filmDetailsPresenter && this._filmDetailsPresenter.filmId === updatedFilm.id) {
+          this._filmDetailsPresenter.init(updatedFilm);
+        }
         break;
     }
   }

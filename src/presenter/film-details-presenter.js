@@ -42,7 +42,7 @@ export default class FilmDetailsPresenter {
     remove(previous);
   }
 
-  getFilmId() {
+  get filmId() {
     return this._film.id;
   }
 
