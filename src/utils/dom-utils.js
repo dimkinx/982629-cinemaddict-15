@@ -65,4 +65,6 @@ export const remove = (component) => {
 
 export const isEscEvent = (evt) => evt.key === 'Escape' || evt.key === 'Esc';
 
+export const isCtrlEnterEvent = (evt) => evt.ctrlKey && evt.key === 'Enter';
+
 export const addActiveModifier = (predicate, className) => predicate ? `${className} ${className}--active`: className;

@@ -33,13 +33,14 @@ export default class CommentsModel extends AbstractObserver {
     this._localComment = LOCAL_COMMENT_DEFAULT;
   }
 
-  addComment(updateType, comment) {
+  addComment(updateType, comment, updatedFilm) {
     this._comments = [
       comment,
       ...this._comments,
     ];
 
-    this._notify(updateType, comment);
+    this._allComments[updatedFilm.id] = this._comments;
+    this._notify(updateType, updatedFilm);
   }
 
   deleteComment(updateType, commentId, updatedFilm) {
@@ -55,7 +56,6 @@ export default class CommentsModel extends AbstractObserver {
     ];
 
     this._allComments[updatedFilm.id] = this._comments;
-
     this._notify(updateType, updatedFilm);
   }
 }

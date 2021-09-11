@@ -8,4 +8,4 @@ export const MAX_LENGTH_DESCRIPTION = 140;
 
 export const REGEXP_ALL_FILMS_COUNT = /\B(?=(\d{3})+(?!\d))/g;
 
-export const LOCAL_COMMENT_DEFAULT = {emotion: '', text: ''};
+export const LOCAL_COMMENT_DEFAULT = {emotion: '', comment: ''};

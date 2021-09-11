@@ -1,7 +1,10 @@
 import SmartView from './smart-view';
-import {addActiveModifier} from '../utils/dom-utils';
+import {addActiveModifier, isCtrlEnterEvent} from '../utils/dom-utils';
 import {convertDateToMs, getFormattedCommentDate, getFormattedDate, getFormattedDuration} from '../utils/date-time-utils';
 import {UpdateType, UserAction} from '../types';
+import he from 'he';
+import {getRandomNumber} from '../utils/mock-utils';
+import {LOCAL_COMMENT_DEFAULT} from '../const';
 
 const createCommentTemplate = (comment) => (
   `<li class="film-details__comment" data-comment-id="${comment.id}">
@@ -9,7 +12,7 @@ const createCommentTemplate = (comment) => (
       <img src="./images/emoji/${comment.emotion}.png" width="55" height="55" alt="emoji-${comment.emotion}">
     </span>
     <div>
-      <p class="film-details__comment-text">${comment.comment}</p>
+      <p class="film-details__comment-text">${he.encode(comment.comment)}</p>
       <p class="film-details__comment-info">
         <span class="film-details__comment-author">${comment.author}</span>
         <span class="film-details__comment-day">${getFormattedCommentDate(comment.date)}</span>
@@ -121,7 +124,7 @@ const createFilmDetailsTemplate = ({film, comments, state}) => (
             <div class="film-details__add-emoji-label">${(state.emotion) ? createEmotionTemplate(state.emotion) : ''}</div>
 
             <label class="film-details__comment-label">
-              <textarea class="film-details__comment-input" placeholder="Select reaction below and write comment here" name="comment">${state.text}</textarea>
+              <textarea class="film-details__comment-input" placeholder="Select reaction below and write comment here" name="comment">${state.comment}</textarea>
             </label>
 
             <div class="film-details__emoji-list">
@@ -196,7 +199,7 @@ export default class FilmDetailsView extends SmartView {
     this._emotionChangeHandler = this._emotionChangeHandler.bind(this);
     this._localCommentInputHandler = this._localCommentInputHandler.bind(this);
     this._commentDeleteClickHandler = this._commentDeleteClickHandler.bind(this);
-    this._commentSubmitHandler = this._commentSubmitHandler.bind(this);
+    this._commentAddKeydownHandler = this._commentAddKeydownHandler.bind(this);
 
     this._setInnerHandlers();
   }
@@ -227,8 +230,8 @@ export default class FilmDetailsView extends SmartView {
     this.getElement().querySelector('#favorite').addEventListener('click', this._favoriteButtonClickHandler);
     this.getElement().querySelector('.film-details__emoji-list').addEventListener('change', this._emotionChangeHandler);
     this.getElement().querySelector('.film-details__comment-input').addEventListener('input', this._localCommentInputHandler);
+    this.getElement().querySelector('.film-details__comment-input').addEventListener('keydown', this._commentAddKeydownHandler);
     this.getElement().querySelector('.film-details__comments-list').addEventListener('click', this._commentDeleteClickHandler);
-    this.getElement().querySelector('form').addEventListener('submit', this._commentSubmitHandler);
   }
 
   _closeFilmDetailsClickHandler(evt) {
@@ -262,8 +265,23 @@ export default class FilmDetailsView extends SmartView {
 
   _localCommentInputHandler(evt) {
     evt.preventDefault();
-    this.updateData({state: {...this._data.state, text: evt.target.value}}, true);
+    this.updateData({state: {...this._data.state, comment: evt.target.value}}, true);
     this._changeData(UserAction.UPDATE_LOCAL_COMMENT, UpdateType.JUST_UPDATE_DATA, FilmDetailsView.parseDataToLocalComment(this._data));
+  }
+
+  _commentAddKeydownHandler(evt) {
+    if (isCtrlEnterEvent(evt)) {
+      const id = getRandomNumber(1000, 10000);
+      const comment = Object.assign({}, FilmDetailsView.parseDataToLocalComment(this._data), {id: String(id)});
+
+      if (comment.emotion && comment.comment) {
+        this.updateData({state: {...this._data.state, comments: [id, ...this._data.state.comments]}}, true);
+        this.updateData({state: {...this._data.state, emotion: LOCAL_COMMENT_DEFAULT.emotion, comment: LOCAL_COMMENT_DEFAULT.comment}});
+        this._changeData(UserAction.UPDATE_LOCAL_COMMENT, UpdateType.JUST_UPDATE_DATA, FilmDetailsView.parseDataToLocalComment(this._data));
+        this._changeData(UserAction.UPDATE_FILM, UpdateType.PATCH, FilmDetailsView.parseDataToFilm(this._data));
+        this._changeData(UserAction.ADD_COMMENT, UpdateType.PATCH, comment, FilmDetailsView.parseDataToFilm(this._data));
+      }
+    }
   }
 
   _commentDeleteClickHandler(evt) {
@@ -279,10 +297,6 @@ export default class FilmDetailsView extends SmartView {
     this._changeData(UserAction.DELETE_COMMENT, UpdateType.PATCH, commentId, FilmDetailsView.parseDataToFilm(this._data));
   }
 
-  _commentSubmitHandler(evt) {
-    evt.preventDefault();
-  }
-
   static parseFilmDetailsToData(film, comments, localComment) {
     return Object.assign(
       {},
@@ -290,12 +304,12 @@ export default class FilmDetailsView extends SmartView {
       {comments},
       {localComment},
       {state: {
-        comments: film.comments,
         hasInWatchlist: film.userDetails.watchlist,
         wasAlreadyWatched: film.userDetails.alreadyWatched,
         isFavorite: film.userDetails.favorite,
         emotion: localComment.emotion,
-        text: localComment.text,
+        comment: localComment.comment,
+        comments: film.comments,
       }},
     );
   }
@@ -319,7 +333,7 @@ export default class FilmDetailsView extends SmartView {
       {},
       {
         emotion: data.state.emotion,
-        text: data.state.text,
+        comment: data.state.comment,
       },
     );
   }
