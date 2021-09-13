@@ -8,24 +8,27 @@ export const createElement = (template) => {
   return newElement.firstElementChild;
 };
 
-export const render = (container, child, place = RenderPlace.BEFORE_END) => {
+export const render = (container, element, place = RenderPlace.BEFORE_END) => {
   if (container instanceof AbstractView) {
     container = container.getElement();
   }
 
-  if (child instanceof AbstractView) {
-    child = child.getElement();
+  if (element instanceof AbstractView) {
+    element = element.getElement();
   }
 
   switch (place) {
+    case (RenderPlace.BEFORE_BEGIN):
+      container.before(element);
+      break;
     case (RenderPlace.AFTER_BEGIN):
-      container.prepend(child);
+      container.prepend(element);
       break;
     case (RenderPlace.BEFORE_END):
-      container.append(child);
+      container.append(element);
       break;
     case (RenderPlace.AFTER_END):
-      container.after(child);
+      container.after(element);
   }
 };
 
@@ -47,20 +50,6 @@ export const replace = (newChild, oldChild) => {
   parent.replaceChild(newChild, oldChild);
 };
 
-export const update = (items, updateItem) => {
-  const index = items.findIndex((item) => item.id === updateItem.id);
-
-  if (index === -1) {
-    return items;
-  }
-
-  return [
-    ...items.slice(0, index),
-    updateItem,
-    ...items.slice(index + 1),
-  ];
-};
-
 export const remove = (component) => {
   if (component === null) {
     return;
@@ -75,5 +64,7 @@ export const remove = (component) => {
 };
 
 export const isEscEvent = (evt) => evt.key === 'Escape' || evt.key === 'Esc';
+
+export const isCtrlEnterEvent = (evt) => evt.ctrlKey && evt.key === 'Enter';
 
 export const addActiveModifier = (predicate, className) => predicate ? `${className} ${className}--active`: className;

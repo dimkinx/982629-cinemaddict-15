@@ -1,9 +1,25 @@
 import {convertDateToMs} from './utils/date-time-utils';
 
 export const RenderPlace = {
+  BEFORE_BEGIN: 'beforebegin',
   AFTER_BEGIN: 'afterbegin',
   BEFORE_END: 'beforeend',
   AFTER_END: 'afterend',
+};
+
+export const UserAction = {
+  UPDATE_FILM: 'UPDATE_FILM',
+  ADD_COMMENT: 'ADD_COMMENT',
+  DELETE_COMMENT: 'DELETE_COMMENT',
+  UPDATE_LOCAL_COMMENT: 'UPDATE_LOCAL_COMMENT',
+  RESET_LOCAL_COMMENT: 'RESET_LOCAL_COMMENT',
+};
+
+export const UpdateType = {
+  JUST_UPDATE_DATA: 'JUST_UPDATE_DATA',
+  PATCH: 'PATCH',
+  MINOR: 'MINOR',
+  MAJOR: 'MAJOR',
 };
 
 export const Rank = {

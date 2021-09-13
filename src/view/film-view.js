@@ -1,11 +1,8 @@
 import SmartView from './smart-view';
 import {getFormattedDate, getFormattedDuration} from '../utils/date-time-utils';
 import {addActiveModifier} from '../utils/dom-utils';
-import {MAX_LENGTH_DESCRIPTION} from '../const';
-
-const trimText = (text, length = MAX_LENGTH_DESCRIPTION) => (text.length > length)
-  ? text.slice(0, length - 1).concat('…')
-  : text;
+import {trimText} from '../utils/text-formatting-utils';
+import {UpdateType, UserAction} from '../types';
 
 const createFilmCardTemplate = ({film, state}) => (
   `<article class="film-card">
@@ -20,9 +17,18 @@ const createFilmCardTemplate = ({film, state}) => (
     <p class="film-card__description">${trimText(film.filmInfo.description)}</p>
     <a class="film-card__comments">${film.comments.length} comments</a>
     <div class="film-card__controls">
-      <button class="${addActiveModifier(state.hasInWatchlist, 'film-card__controls-item')} film-card__controls-item--add-to-watchlist" type="button">Add to watchlist</button>
-      <button class="${addActiveModifier(state.wasAlreadyWatched, 'film-card__controls-item')} film-card__controls-item--mark-as-watched" type="button">Mark as watched</button>
-      <button class="${addActiveModifier(state.isFavorite, 'film-card__controls-item')} film-card__controls-item--favorite" type="button">Mark as favorite</button>
+      <button
+        class="${addActiveModifier(state.hasInWatchlist, 'film-card__controls-item')} film-card__controls-item--add-to-watchlist"
+        type="button"
+      >Add to watchlist</button>
+      <button
+        class="${addActiveModifier(state.wasAlreadyWatched, 'film-card__controls-item')} film-card__controls-item--mark-as-watched"
+        type="button"
+      >Mark as watched</button>
+      <button
+        class="${addActiveModifier(state.isFavorite, 'film-card__controls-item')} film-card__controls-item--favorite"
+        type="button"
+      >Mark as favorite</button>
     </div>
   </article>`
 );
@@ -71,21 +77,20 @@ export default class FilmView extends SmartView {
 
   _watchlistButtonClickHandler(evt) {
     evt.preventDefault();
-    this.updateData({state: {...this._data.state, hasInWatchlist: !this._data.state.hasInWatchlist}});
-    this._changeData(FilmView.parseDataToFilm(this._data));
+    this.updateData({state: {...this._data.state, hasInWatchlist: !this._data.state.hasInWatchlist}}, true);
+    this._changeData(UserAction.UPDATE_FILM, UpdateType.MINOR, FilmView.parseDataToFilm(this._data));
   }
 
   _watchedButtonClickHandler(evt) {
     evt.preventDefault();
-    this.updateData({state: {...this._data.state, wasAlreadyWatched: !this._data.state.wasAlreadyWatched}});
-    this._changeData(FilmView.parseDataToFilm(this._data));
+    this.updateData({state: {...this._data.state, wasAlreadyWatched: !this._data.state.wasAlreadyWatched}}, true);
+    this._changeData(UserAction.UPDATE_FILM, UpdateType.MINOR, FilmView.parseDataToFilm(this._data));
   }
 
   _favoriteButtonClickHandler(evt) {
     evt.preventDefault();
-    this.updateData({state: {...this._data.state, isFavorite: !this._data.state.isFavorite}});
-    this._changeData(FilmView.parseDataToFilm(this._data));
-
+    this.updateData({state: {...this._data.state, isFavorite: !this._data.state.isFavorite}}, true);
+    this._changeData(UserAction.UPDATE_FILM, UpdateType.MINOR, FilmView.parseDataToFilm(this._data));
   }
 
   static parseFilmToData(film) {
