@@ -1,5 +1,5 @@
 import SmartView from './smart-view';
-import {getFormattedDate, getFormattedDuration} from '../utils/date-time-utils';
+import {getFormattedDate, getFormattedDuration, getCurrentISOStringDate} from '../utils/date-time-utils';
 import {addActiveModifier} from '../utils/dom-utils';
 import {trimText} from '../utils/text-formatting-utils';
 import {UpdateType, UserAction} from '../types';
@@ -83,7 +83,11 @@ export default class FilmView extends SmartView {
 
   _watchedButtonClickHandler(evt) {
     evt.preventDefault();
-    this.updateData({state: {...this._data.state, wasAlreadyWatched: !this._data.state.wasAlreadyWatched}}, true);
+    this.updateData({state: {
+      ...this._data.state,
+      wasAlreadyWatched: !this._data.state.wasAlreadyWatched,
+      watchingDate: (!this._data.state.wasAlreadyWatched) ? getCurrentISOStringDate() : null,
+    }}, true);
     this._changeData(UserAction.UPDATE_FILM, UpdateType.MINOR, FilmView.parseDataToFilm(this._data));
   }
 
@@ -100,6 +104,7 @@ export default class FilmView extends SmartView {
       {state: {
         hasInWatchlist: film.userDetails.watchlist,
         wasAlreadyWatched: film.userDetails.alreadyWatched,
+        watchingDate: film.userDetails.watchingDate,
         isFavorite: film.userDetails.favorite,
       }},
     );
@@ -110,9 +115,9 @@ export default class FilmView extends SmartView {
       {},
       data.film,
       {userDetails: {
-        ...data.film.userDetails,
         watchlist: data.state.hasInWatchlist,
         alreadyWatched: data.state.wasAlreadyWatched,
+        watchingDate: data.state.watchingDate,
         favorite: data.state.isFavorite,
       }},
     );

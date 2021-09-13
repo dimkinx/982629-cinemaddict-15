@@ -1,5 +1,18 @@
 import {convertDateToMs} from './utils/date-time-utils';
 
+export const Method = {
+  GET: 'GET',
+  POST: 'POST',
+  PUT: 'PUT',
+  DELETE: 'DELETE',
+};
+
+export const EndPoint = {
+  MOVIES: 'movies',
+  COMMENTS: 'comments',
+  SYNC: 'sync',
+};
+
 export const RenderPlace = {
   BEFORE_BEGIN: 'beforebegin',
   AFTER_BEGIN: 'afterbegin',
@@ -20,6 +33,7 @@ export const UpdateType = {
   PATCH: 'PATCH',
   MINOR: 'MINOR',
   MAJOR: 'MAJOR',
+  INIT: 'INIT',
 };
 
 export const Rank = {

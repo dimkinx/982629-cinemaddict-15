@@ -26,6 +26,10 @@ export default class ProfilePresenter {
       return;
     }
 
+    if (!this._getViewsCount()) {
+      return;
+    }
+
     if (previous === null) {
       this._profileComponent = new ProfileView(this._getProfileRank());
       render(this._headerContainer, this._profileComponent);
