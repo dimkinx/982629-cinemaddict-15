@@ -38,13 +38,13 @@ export default class FilmsPresenter {
     this._handleFilmDetailsClose = this._handleFilmDetailsClose.bind(this);
     this._handleViewAction = this._handleViewAction.bind(this);
     this._handleModelEvent = this._handleModelEvent.bind(this);
-
-    this._filmsModel.addObserver(this._handleModelEvent);
-    this._commentsModel.addObserver(this._handleModelEvent);
-    this._filterModel.addObserver(this._handleModelEvent);
   }
 
   init() {
+    this._filmsModel.addObserver(this._handleModelEvent);
+    this._commentsModel.addObserver(this._handleModelEvent);
+    this._filterModel.addObserver(this._handleModelEvent);
+
     if (this._isLoading) {
       render(this._mainContainer, this._filmsLoadingComponent);
       return;
@@ -53,6 +53,19 @@ export default class FilmsPresenter {
     this._renderFilmsContainer();
     this._renderFilmsBoard();
     this._renderFilmsExtra();
+  }
+
+  destroy() {
+    this._clearFilmsExtra();
+    this._clearFilmsBoard();
+    this._clearFilmsContainer();
+
+    this._filmDetailsPresenter && this._filmDetailsPresenter.destroy();
+    this._currentSortType = SortType.DEFAULT.name;
+
+    this._filmsModel.removeObserver(this._handleModelEvent);
+    this._commentsModel.removeObserver(this._handleModelEvent);
+    this._filterModel.removeObserver(this._handleModelEvent);
   }
 
   _getFilms() {
@@ -134,7 +147,7 @@ export default class FilmsPresenter {
     remove(this._sortComponent);
     remove(this._showMoreButtonComponent);
 
-    if (this._getFilms().length === 1) {
+    if (this._getFilms().length) {
       this._filmsCountToRender = FILMS_COUNT_PER_STEP;
     }
 
@@ -187,6 +200,7 @@ export default class FilmsPresenter {
       return;
     }
 
+    this._filmsCountToRender = FILMS_COUNT_PER_STEP;
     this._currentSortType = sortType;
     this._clearFilmsBoard();
     this._renderFilmsBoard();

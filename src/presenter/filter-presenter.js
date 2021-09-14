@@ -1,11 +1,10 @@
-import NavigationView from '../view/navigation-view';
 import FilterView from '../view/filter-view';
 import {render, replace, remove} from '../utils/dom-utils';
 import {FilterType, RenderPlace, UpdateType} from '../types';
 
 export default class FilterPresenter {
-  constructor(mainContainer, filterModel, filmsModel) {
-    this._mainContainer = mainContainer;
+  constructor(navigationComponent, filterModel, filmsModel) {
+    this._navigationComponent = navigationComponent;
     this._filterModel = filterModel;
     this._filmsModel = filmsModel;
 
@@ -22,12 +21,10 @@ export default class FilterPresenter {
   init() {
     const previous = this._filterComponent;
 
-    this._navigationComponent = new NavigationView();
-    this._filterComponent = new FilterView(this._currentFilterType, this._getCounts());
+    this._filterComponent = new FilterView(this._currentFilterType, this._filterModel.getState(), this._getCounts());
     this._filterComponent.setFilterTypeChangeHandler(this._handleFilterTypeChange);
 
     if (previous === null) {
-      render(this._mainContainer, this._navigationComponent, RenderPlace.AFTER_BEGIN);
       render(this._navigationComponent, this._filterComponent, RenderPlace.AFTER_BEGIN);
       return;
     }
