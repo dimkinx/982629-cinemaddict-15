@@ -8,3 +8,8 @@ export const applyCamelCase = (text) => text
   .split(' ')
   .map((subText) => `${subText[0].toUpperCase()}${subText.slice(1)}`)
   .join('');
+
+export const applyUpperSnakeCase = (text) => text
+  .toUpperCase()
+  .split('-')
+  .join('_');

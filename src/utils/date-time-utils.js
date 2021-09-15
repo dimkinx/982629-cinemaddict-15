@@ -16,3 +16,5 @@ export const getFormattedDuration = (time) => dayjs
   .format(`${(Math.trunc(time / 60)) ? 'H[h] ' : ''}mm[m]`);
 
 export const getCurrentISOStringDate = () => dayjs().toDate().toISOString();
+
+export const isDateInPeriod = (date, period) => dayjs(date).isAfter(dayjs().subtract(1, period));
