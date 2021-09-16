@@ -148,7 +148,7 @@ const createStatisticsTemplate = (data, rank) => (
       </li>
       <li class="statistic__text-item">
         <h4 class="statistic__item-title">Top genre</h4>
-        <p class="statistic__item-text">${data.topGenre}</p>
+        <p class="statistic__item-text">${data.topGenre ? data.topGenre : ''}</p>
       </li>
     </ul>
 

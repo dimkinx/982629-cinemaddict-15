@@ -57,11 +57,10 @@ export default class FilmsPresenter {
 
   destroy() {
     this._clearFilmsExtra();
-    this._clearFilmsBoard();
+    this._clearFilmsBoard({isFilmsCountReset: true, isSortTypeReset: true});
     this._clearFilmsContainer();
 
     this._filmDetailsPresenter && this._filmDetailsPresenter.destroy();
-    this._currentSortType = SortType.DEFAULT.name;
 
     this._filmsModel.removeObserver(this._handleModelEvent);
     this._commentsModel.removeObserver(this._handleModelEvent);
@@ -147,7 +146,7 @@ export default class FilmsPresenter {
     remove(this._sortComponent);
     remove(this._showMoreButtonComponent);
 
-    if (this._filmsCountToRender < FILMS_COUNT_PER_STEP) {
+    if (this._filmsCountToRender <= FILMS_COUNT_PER_STEP) {
       this._filmsCountToRender = this._getFilms().length;
     }
 
@@ -277,7 +276,10 @@ export default class FilmsPresenter {
         this._clearFilmsContainer();
         this._clearFilmsBoard();
         this._clearFilmsExtra();
-        this.init();
+
+        this._renderFilmsContainer();
+        this._renderFilmsBoard();
+        this._renderFilmsExtra();
 
         if (this._filmDetailsPresenter && this._filmDetailsPresenter.filmId === updatedFilm.id) {
           this._filmDetailsPresenter.init(updatedFilm);
@@ -287,7 +289,10 @@ export default class FilmsPresenter {
         this._clearFilmsContainer();
         this._clearFilmsBoard({isFilmsCountReset: true, isSortTypeReset: true});
         this._clearFilmsExtra();
-        this.init();
+
+        this._renderFilmsContainer();
+        this._renderFilmsBoard();
+        this._renderFilmsExtra();
 
         if (this._filmDetailsPresenter && this._filmDetailsPresenter.filmId === updatedFilm.id) {
           this._filmDetailsPresenter.init(updatedFilm);
