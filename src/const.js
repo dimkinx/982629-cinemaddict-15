@@ -15,3 +15,5 @@ export const AUTHORIZATION = 'Basic 0K3RgtC+IPCfkJQg0L3QsCDRgdC80LXRhSE=';
 export const MAIN_TITLE = 'All movies. Upcoming';
 
 export const LOADING_TITLE = 'Loading...';
+
+export const STATISTIC_BAR_HEIGHT = 50;

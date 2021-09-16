@@ -36,6 +36,29 @@ export const UpdateType = {
   INIT: 'INIT',
 };
 
+export const StatisticFilterType = {
+  ALL_TIME: {
+    name: 'all-time',
+    shorthand: 'all',
+  },
+  TODAY: {
+    name: 'today',
+    shorthand: 'd',
+  },
+  WEEK: {
+    name: 'week',
+    shorthand: 'w',
+  },
+  MONTH: {
+    name: 'month',
+    shorthand: 'M',
+  },
+  YEAR: {
+    name: 'year',
+    shorthand: 'y',
+  },
+};
+
 export const Rank = {
   NOVICE: {
     name: 'novice',

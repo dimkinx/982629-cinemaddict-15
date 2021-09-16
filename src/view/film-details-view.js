@@ -1,10 +1,15 @@
 import SmartView from './smart-view';
 import {addActiveModifier, isCtrlEnterEvent} from '../utils/dom-utils';
-import {convertDateToMs, getFormattedCommentDate, getFormattedDate, getFormattedDuration} from '../utils/date-time-utils';
+import {
+  convertDateToMs,
+  getCurrentISOStringDate,
+  getFormattedCommentDate,
+  getFormattedDate,
+  getFormattedDuration
+} from '../utils/date-time-utils';
 import {UpdateType, UserAction} from '../types';
-import he from 'he';
-import {getRandomNumber} from '../utils/mock-utils';
 import {LOCAL_COMMENT_DEFAULT} from '../const';
+import he from 'he';
 
 const createCommentTemplate = (comment) => (
   `<li class="film-details__comment" data-comment-id="${comment.id}">
@@ -247,7 +252,11 @@ export default class FilmDetailsView extends SmartView {
 
   _watchedButtonClickHandler(evt) {
     evt.preventDefault();
-    this.updateData({state: {...this._data.state, wasAlreadyWatched: !this._data.state.wasAlreadyWatched}}, true);
+    this.updateData({state: {
+      ...this._data.state,
+      wasAlreadyWatched: !this._data.state.wasAlreadyWatched,
+      watchingDate: (!this._data.state.wasAlreadyWatched) ? getCurrentISOStringDate() : null,
+    }}, true);
     this._changeData(UserAction.UPDATE_FILM, UpdateType.MINOR, FilmDetailsView.parseDataToFilm(this._data));
   }
 
@@ -271,11 +280,10 @@ export default class FilmDetailsView extends SmartView {
 
   _commentAddKeydownHandler(evt) {
     if (isCtrlEnterEvent(evt)) {
-      const id = getRandomNumber(1000, 10000);
-      const comment = Object.assign({}, FilmDetailsView.parseDataToLocalComment(this._data), {id: String(id)});
+      const comment = Object.assign({}, FilmDetailsView.parseDataToLocalComment(this._data));
 
       if (comment.emotion && comment.comment) {
-        this.updateData({state: {...this._data.state, comments: [id, ...this._data.state.comments]}}, true);
+        this.updateData({state: {...this._data.state, comments: [...this._data.state.comments]}}, true);
         this.updateData({state: {...this._data.state, emotion: LOCAL_COMMENT_DEFAULT.emotion, comment: LOCAL_COMMENT_DEFAULT.comment}});
         this._changeData(UserAction.UPDATE_LOCAL_COMMENT, UpdateType.JUST_UPDATE_DATA, FilmDetailsView.parseDataToLocalComment(this._data));
         this._changeData(UserAction.UPDATE_FILM, UpdateType.PATCH, FilmDetailsView.parseDataToFilm(this._data));
@@ -306,6 +314,7 @@ export default class FilmDetailsView extends SmartView {
       {state: {
         hasInWatchlist: film.userDetails.watchlist,
         wasAlreadyWatched: film.userDetails.alreadyWatched,
+        watchingDate: film.userDetails.watchingDate,
         isFavorite: film.userDetails.favorite,
         emotion: localComment.emotion,
         comment: localComment.comment,
@@ -320,9 +329,9 @@ export default class FilmDetailsView extends SmartView {
       data.film,
       {comments: data.state.comments},
       {userDetails: {
-        ...data.film.userDetails,
         watchlist: data.state.hasInWatchlist,
         alreadyWatched: data.state.wasAlreadyWatched,
+        watchingDate: data.state.watchingDate,
         favorite: data.state.isFavorite,
       }},
     );
