@@ -7,7 +7,7 @@ import FilmPresenter from './film-presenter';
 import FilmDetailsPresenter from './film-details-presenter';
 import {render, remove} from '../utils/dom-utils';
 import {applyCamelCase} from '../utils/text-formatting-utils';
-import {RenderPlace, FilterType, SortType, ExtraList, UserAction, UpdateType} from '../types';
+import {RenderPlace, FilterType, SortType, ExtraList, UserAction, UpdateType, CommentsFormState} from '../types';
 import {FILMS_COUNT_PER_STEP, FILMS_EXTRA_COUNT} from '../const';
 
 export default class FilmsPresenter {
@@ -245,17 +245,21 @@ export default class FilmsPresenter {
           .then((response) => this._filmsModel.updateFilm(updateType, response));
         break;
       case UserAction.ADD_COMMENT:
+        this._filmDetailsPresenter.setViewState(CommentsFormState.SAVING);
         this._api.addComment(update, updatedFilm.id)
           .then(({film, comments}) => {
             this._commentsModel.addComment(comments);
             return film;
           })
-          .then((film) => this._filmsModel.updateFilm(updateType, film));
+          .then((film) => this._filmsModel.updateFilm(updateType, film))
+          .catch(() => this._filmDetailsPresenter.setViewState(CommentsFormState.ABORTING));
         break;
       case UserAction.DELETE_COMMENT:
+        this._filmDetailsPresenter.setViewState(CommentsFormState.DELETING, update);
         this._api.deleteComment(update)
           .then(() => this._commentsModel.deleteComment(update))
-          .then(() => this._filmsModel.updateFilm(updateType, updatedFilm));
+          .then(() => this._filmsModel.updateFilm(updateType, updatedFilm))
+          .catch(() => this._filmDetailsPresenter.setViewState(CommentsFormState.ABORTING, update));
         break;
       case UserAction.UPDATE_LOCAL_COMMENT:
         this._commentsModel.updateLocalComment(update);

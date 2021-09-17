@@ -11,7 +11,7 @@ import {UpdateType, UserAction} from '../types';
 import {LOCAL_COMMENT_DEFAULT} from '../const';
 import he from 'he';
 
-const createCommentTemplate = (comment) => (
+const createCommentTemplate = (comment, isDisabled, id) => (
   `<li class="film-details__comment" data-comment-id="${comment.id}">
     <span class="film-details__comment-emoji">
       <img src="./images/emoji/${comment.emotion}.png" width="55" height="55" alt="emoji-${comment.emotion}">
@@ -21,7 +21,9 @@ const createCommentTemplate = (comment) => (
       <p class="film-details__comment-info">
         <span class="film-details__comment-author">${comment.author}</span>
         <span class="film-details__comment-day">${getFormattedCommentDate(comment.date)}</span>
-        <button class="film-details__comment-delete">Delete</button>
+        <button class="film-details__comment-delete" ${(isDisabled || (id === comment.id)) ? 'disabled' : ''}>
+          ${(id === comment.id) ? 'Deleting...' : 'Delete'}
+        </button>
       </p>
     </div>
   </li>`
@@ -32,7 +34,7 @@ const createEmotionTemplate = (emotion) => (
   <img src="images/emoji/${emotion}.png" width="55" height="55" alt="emoji-${emotion}">`
 );
 
-const createFilmDetailsTemplate = ({film, comments, state}) => (
+const createFilmDetailsTemplate = ({film, comments, state, formState}) => (
   `<section class="film-details">
     <form class="film-details__inner" action="" method="get">
       <div class="film-details__top-container">
@@ -122,14 +124,19 @@ const createFilmDetailsTemplate = ({film, comments, state}) => (
           <h3 class="film-details__comments-title">Comments <span class="film-details__comments-count">${comments.length}</span></h3>
 
           <ul class="film-details__comments-list">
-            ${comments.slice().sort((first, second) => (convertDateToMs(first.date) - convertDateToMs(second.date))).map(createCommentTemplate).join('\n')}
+            ${comments.slice().sort((first, second) => (convertDateToMs(first.date) - convertDateToMs(second.date))).map((comment) => createCommentTemplate(comment, formState.isDisabled, formState.deletingCommentId)).join('\n')}
           </ul>
 
           <div class="film-details__new-comment">
             <div class="film-details__add-emoji-label">${(state.emotion) ? createEmotionTemplate(state.emotion) : ''}</div>
 
             <label class="film-details__comment-label">
-              <textarea class="film-details__comment-input" placeholder="Select reaction below and write comment here" name="comment">${state.comment}</textarea>
+              <textarea
+                class="film-details__comment-input"
+                placeholder="Select reaction below and write comment here"
+                name="comment"
+                ${formState.isDisabled ? 'readonly' : ''}
+              >${state.comment}</textarea>
             </label>
 
             <div class="film-details__emoji-list">
@@ -140,6 +147,7 @@ const createFilmDetailsTemplate = ({film, comments, state}) => (
                 id="emoji-smile"
                 value="smile"
                 ${(state.emotion === 'smile') ? 'checked' : ''}
+                ${formState.isDisabled ? 'disabled' : ''}
               >
               <label class="film-details__emoji-label" for="emoji-smile">
                 <img src="./images/emoji/smile.png" width="30" height="30" alt="emoji">
@@ -152,6 +160,7 @@ const createFilmDetailsTemplate = ({film, comments, state}) => (
                 id="emoji-sleeping"
                 value="sleeping"
                 ${(state.emotion === 'sleeping') ? 'checked' : ''}
+                ${formState.isDisabled ? 'disabled' : ''}
               >
               <label class="film-details__emoji-label" for="emoji-sleeping">
                 <img src="./images/emoji/sleeping.png" width="30" height="30" alt="emoji">
@@ -164,6 +173,7 @@ const createFilmDetailsTemplate = ({film, comments, state}) => (
                 id="emoji-puke"
                 value="puke"
                 ${(state.emotion === 'puke') ? 'checked' : ''}
+                ${formState.isDisabled ? 'disabled' : ''}
               >
               <label class="film-details__emoji-label" for="emoji-puke">
                 <img src="./images/emoji/puke.png" width="30" height="30" alt="emoji">
@@ -176,6 +186,7 @@ const createFilmDetailsTemplate = ({film, comments, state}) => (
                 id="emoji-angry"
                 value="angry"
                 ${(state.emotion === 'angry') ? 'checked' : ''}
+                ${formState.isDisabled ? 'disabled' : ''}
               >
               <label class="film-details__emoji-label" for="emoji-angry">
                 <img src="./images/emoji/angry.png" width="30" height="30" alt="emoji">
@@ -317,6 +328,10 @@ export default class FilmDetailsView extends SmartView {
         emotion: localComment.emotion,
         comment: localComment.comment,
         comments: film.comments,
+      }},
+      {formState: {
+        isDisabled: false,
+        deletingCommentId: null,
       }},
     );
   }

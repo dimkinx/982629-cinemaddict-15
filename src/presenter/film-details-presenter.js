@@ -1,6 +1,6 @@
 import FilmDetailsView from '../view/film-details-view';
 import {render, replace, remove, isEscEvent} from '../utils/dom-utils';
-import {UpdateType, UserAction} from '../types';
+import {CommentsFormState, UpdateType, UserAction} from '../types';
 
 export default class FilmDetailsPresenter {
   constructor(commentsModel, closePopup, changeData) {
@@ -47,6 +47,24 @@ export default class FilmDetailsPresenter {
 
   destroy() {
     this._handleCloseFilmDetailsClick();
+  }
+
+  setViewState(state, id) {
+    switch (state) {
+      case CommentsFormState.SAVING:
+        this._filmDetailsComponent.updateData({formState: {isDisabled: true, deletingCommentId: null}});
+        break;
+      case CommentsFormState.DELETING:
+        this._filmDetailsComponent.updateData({formState: {isDisabled: true, deletingCommentId: id}});
+        break;
+      case CommentsFormState.ABORTING:
+        this._filmDetailsComponent.updateData({formState: {isDisabled: false, deletingCommentId: null}});
+
+        (id)
+          ? this._filmDetailsComponent.shake(this._filmDetailsComponent.getElement().querySelector(`[data-comment-id="${id}"]`))
+          : this._filmDetailsComponent.shake(this._filmDetailsComponent.getElement().querySelector('.film-details__new-comment'));
+        break;
+    }
   }
 
   _handleCloseFilmDetailsClick() {

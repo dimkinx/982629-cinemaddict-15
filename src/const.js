@@ -17,3 +17,5 @@ export const MAIN_TITLE = 'All movies. Upcoming';
 export const LOADING_TITLE = 'Loading...';
 
 export const STATISTIC_BAR_HEIGHT = 50;
+
+export const SHAKE_ANIMATION_TIMEOUT = 600;
