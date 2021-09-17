@@ -146,7 +146,7 @@ export default class FilmsPresenter {
     remove(this._sortComponent);
     remove(this._showMoreButtonComponent);
 
-    if (this._filmsCountToRender <= FILMS_COUNT_PER_STEP) {
+    if (this._filmsCountToRender < FILMS_COUNT_PER_STEP) {
       this._filmsCountToRender = this._getFilms().length;
     }
 
@@ -199,7 +199,6 @@ export default class FilmsPresenter {
       return;
     }
 
-    this._filmsCountToRender = FILMS_COUNT_PER_STEP;
     this._currentSortType = sortType;
     this._clearFilmsBoard();
     this._renderFilmsBoard();
@@ -242,15 +241,21 @@ export default class FilmsPresenter {
   _handleViewAction(actionType, updateType, update, updatedFilm) {
     switch (actionType) {
       case UserAction.UPDATE_FILM:
-        this._api.updateFilm(update).then((response) => {
-          this._filmsModel.updateFilm(updateType, response);
-        });
+        this._api.updateFilm(update)
+          .then((response) => this._filmsModel.updateFilm(updateType, response));
         break;
       case UserAction.ADD_COMMENT:
-        this._commentsModel.addComment(updateType, update, updatedFilm);
+        this._api.addComment(update, updatedFilm.id)
+          .then(({film, comments}) => {
+            this._commentsModel.addComment(comments);
+            return film;
+          })
+          .then((film) => this._filmsModel.updateFilm(updateType, film));
         break;
       case UserAction.DELETE_COMMENT:
-        this._commentsModel.deleteComment(updateType, update, updatedFilm);
+        this._api.deleteComment(update)
+          .then(() => this._commentsModel.deleteComment(update))
+          .then(() => this._filmsModel.updateFilm(updateType, updatedFilm));
         break;
       case UserAction.UPDATE_LOCAL_COMMENT:
         this._commentsModel.updateLocalComment(update);

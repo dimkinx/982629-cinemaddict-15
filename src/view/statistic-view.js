@@ -75,6 +75,13 @@ const createRankTemplate = (rank) => (
   </p>`
 );
 
+const createTopGenreTemplate = (topGenre) => (
+  `<li class="statistic__text-item">
+    <h4 class="statistic__item-title">Top genre</h4>
+    <p class="statistic__item-text">${topGenre}</p>
+  </li>`
+);
+
 const createStatisticsTemplate = (data, rank) => (
   `<section class="statistic">
     ${data.viewsCount ? createRankTemplate(rank) : ''}
@@ -146,10 +153,7 @@ const createStatisticsTemplate = (data, rank) => (
           ${data.totalDuration.m} <span class="statistic__item-description">m</span>
         </p>
       </li>
-      <li class="statistic__text-item">
-        <h4 class="statistic__item-title">Top genre</h4>
-        <p class="statistic__item-text">${data.topGenre ? data.topGenre : ''}</p>
-      </li>
+      ${data.topGenre ? createTopGenreTemplate(data.topGenre) : ''}
     </ul>
 
     <div class="statistic__chart-wrap">

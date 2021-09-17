@@ -270,6 +270,7 @@ export default class FilmDetailsView extends SmartView {
     evt.preventDefault();
     this.updateData({state: {...this._data.state, emotion: evt.target.value}});
     this._changeData(UserAction.UPDATE_LOCAL_COMMENT, UpdateType.JUST_UPDATE_DATA, FilmDetailsView.parseDataToLocalComment(this._data));
+    this.getElement().querySelector('.film-details__comment-input').focus();
   }
 
   _localCommentInputHandler(evt) {
@@ -280,14 +281,12 @@ export default class FilmDetailsView extends SmartView {
 
   _commentAddKeydownHandler(evt) {
     if (isCtrlEnterEvent(evt)) {
-      const comment = Object.assign({}, FilmDetailsView.parseDataToLocalComment(this._data));
+      const localComment = FilmDetailsView.parseDataToLocalComment(this._data);
 
-      if (comment.emotion && comment.comment) {
-        this.updateData({state: {...this._data.state, comments: [...this._data.state.comments]}}, true);
+      if (localComment.emotion && localComment.comment) {
         this.updateData({state: {...this._data.state, emotion: LOCAL_COMMENT_DEFAULT.emotion, comment: LOCAL_COMMENT_DEFAULT.comment}});
         this._changeData(UserAction.UPDATE_LOCAL_COMMENT, UpdateType.JUST_UPDATE_DATA, FilmDetailsView.parseDataToLocalComment(this._data));
-        this._changeData(UserAction.UPDATE_FILM, UpdateType.PATCH, FilmDetailsView.parseDataToFilm(this._data));
-        this._changeData(UserAction.ADD_COMMENT, UpdateType.PATCH, comment, FilmDetailsView.parseDataToFilm(this._data));
+        this._changeData(UserAction.ADD_COMMENT, UpdateType.PATCH, localComment, FilmDetailsView.parseDataToFilm(this._data));
       }
     }
   }
@@ -300,8 +299,7 @@ export default class FilmDetailsView extends SmartView {
     const commentId = evt.target.closest('li').dataset.commentId;
 
     evt.preventDefault();
-    this.updateData({state: {...this._data.state, comments: this._data.state.comments.filter((id) => id !== +commentId)}}, true);
-    this._changeData(UserAction.UPDATE_FILM, UpdateType.PATCH, FilmDetailsView.parseDataToFilm(this._data));
+    this.updateData({state: {...this._data.state, comments: this._data.state.comments.filter((id) => id !== commentId)}}, true);
     this._changeData(UserAction.DELETE_COMMENT, UpdateType.PATCH, commentId, FilmDetailsView.parseDataToFilm(this._data));
   }
 
