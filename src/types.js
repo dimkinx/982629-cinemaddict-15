@@ -36,6 +36,12 @@ export const UpdateType = {
   INIT: 'INIT',
 };
 
+export const CommentsFormState = {
+  SAVING: 'SAVING',
+  DELETING: 'DELETING',
+  ABORTING: 'ABORTING',
+};
+
 export const StatisticFilterType = {
   ALL_TIME: {
     name: 'all-time',

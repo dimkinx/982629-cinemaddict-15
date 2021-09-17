@@ -7,7 +7,7 @@ import FilmPresenter from './film-presenter';
 import FilmDetailsPresenter from './film-details-presenter';
 import {render, remove} from '../utils/dom-utils';
 import {applyCamelCase} from '../utils/text-formatting-utils';
-import {RenderPlace, FilterType, SortType, ExtraList, UserAction, UpdateType} from '../types';
+import {RenderPlace, FilterType, SortType, ExtraList, UserAction, UpdateType, CommentsFormState} from '../types';
 import {FILMS_COUNT_PER_STEP, FILMS_EXTRA_COUNT} from '../const';
 
 export default class FilmsPresenter {
@@ -146,7 +146,7 @@ export default class FilmsPresenter {
     remove(this._sortComponent);
     remove(this._showMoreButtonComponent);
 
-    if (this._filmsCountToRender <= FILMS_COUNT_PER_STEP) {
+    if (this._filmsCountToRender < FILMS_COUNT_PER_STEP) {
       this._filmsCountToRender = this._getFilms().length;
     }
 
@@ -199,7 +199,6 @@ export default class FilmsPresenter {
       return;
     }
 
-    this._filmsCountToRender = FILMS_COUNT_PER_STEP;
     this._currentSortType = sortType;
     this._clearFilmsBoard();
     this._renderFilmsBoard();
@@ -242,15 +241,25 @@ export default class FilmsPresenter {
   _handleViewAction(actionType, updateType, update, updatedFilm) {
     switch (actionType) {
       case UserAction.UPDATE_FILM:
-        this._api.updateFilm(update).then((response) => {
-          this._filmsModel.updateFilm(updateType, response);
-        });
+        this._api.updateFilm(update)
+          .then((response) => this._filmsModel.updateFilm(updateType, response));
         break;
       case UserAction.ADD_COMMENT:
-        this._commentsModel.addComment(updateType, update, updatedFilm);
+        this._filmDetailsPresenter.setViewState(CommentsFormState.SAVING);
+        this._api.addComment(update, updatedFilm.id)
+          .then(({film, comments}) => {
+            this._commentsModel.addComment(comments);
+            return film;
+          })
+          .then((film) => this._filmsModel.updateFilm(updateType, film))
+          .catch(() => this._filmDetailsPresenter.setViewState(CommentsFormState.ABORTING));
         break;
       case UserAction.DELETE_COMMENT:
-        this._commentsModel.deleteComment(updateType, update, updatedFilm);
+        this._filmDetailsPresenter.setViewState(CommentsFormState.DELETING, update);
+        this._api.deleteComment(update)
+          .then(() => this._commentsModel.deleteComment(update))
+          .then(() => this._filmsModel.updateFilm(updateType, updatedFilm))
+          .catch(() => this._filmDetailsPresenter.setViewState(CommentsFormState.ABORTING, update));
         break;
       case UserAction.UPDATE_LOCAL_COMMENT:
         this._commentsModel.updateLocalComment(update);

@@ -36,7 +36,13 @@ export default class Api {
       body: JSON.stringify(comment),
       headers: new Headers({'Content-Type': 'application/json'}),
     })
-      .then(Api.toJSON);
+      .then(Api.toJSON)
+      .then((response) => {
+        const film = FilmsModel.adaptToClient(response['movie']);
+        const comments = response['comments'];
+
+        return {film, comments};
+      });
   }
 
   deleteComment(commentId) {

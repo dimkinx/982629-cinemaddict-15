@@ -28,16 +28,11 @@ export default class CommentsModel extends AbstractObserver {
     this._localComment = LOCAL_COMMENT_DEFAULT;
   }
 
-  addComment(updateType, comment) {
-    this._comments = [
-      comment,
-      ...this._comments,
-    ];
-
-    this._notify(updateType, comment);
+  addComment(comments) {
+    this._comments = comments;
   }
 
-  deleteComment(updateType, commentId) {
+  deleteComment(commentId) {
     const index = this._comments.findIndex((comment) => comment.id === commentId);
 
     if (index === -1) {
@@ -48,7 +43,5 @@ export default class CommentsModel extends AbstractObserver {
       ...this._comments.slice(0, index),
       ...this._comments.slice(index + 1),
     ];
-
-    this._notify(updateType, commentId);
   }
 }
