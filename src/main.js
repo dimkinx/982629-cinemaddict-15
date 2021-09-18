@@ -1,4 +1,4 @@
-import Api from './api.js';
+import Api from './api/api.js';
 import ProfileModel from './model/profile-model';
 import FilterModel from './model/filter-model';
 import FilmsModel from './model/films-model';
@@ -69,3 +69,7 @@ api.getFilms()
     render(footerStatisticContainer, new FooterStatisticView(filmsModel.getFilms().length));
   })
   .catch(() => filmsModel.setFilms(UpdateType.INIT, []));
+
+window.addEventListener('load', () => {
+  navigator.serviceWorker.register('/sw.js');
+});
