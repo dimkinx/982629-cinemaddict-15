@@ -62,7 +62,7 @@ export default class FilmDetailsPresenter {
 
         (id)
           ? this._filmDetailsComponent.shake(this._filmDetailsComponent.getElement().querySelector(`[data-comment-id="${id}"]`))
-          : this._filmDetailsComponent.shake(this._filmDetailsComponent.getElement());
+          : this._filmDetailsComponent.shake(this._filmDetailsComponent.getElement().querySelector('.film-details__new-comment'));
         break;
     }
   }

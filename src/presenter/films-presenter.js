@@ -226,12 +226,25 @@ export default class FilmsPresenter {
       this._filmDetailsPresenter.destroy();
     }
 
-    this._filmDetailsPresenter = new FilmDetailsPresenter(this._commentsModel, this._handleFilmDetailsClose, this._handleViewAction);
-
     this._api.getComments(film.id)
       .then((comments) => this._commentsModel.setComments(comments))
-      .then(() => this._filmDetailsPresenter.init(film))
-      .catch(() => this._commentsModel.setComments([]));
+      .then(() => {
+        this._filmDetailsPresenter = new FilmDetailsPresenter(
+          this._commentsModel,
+          this._handleFilmDetailsClose,
+          this._handleViewAction,
+        );
+        this._filmDetailsPresenter.init(film);
+      })
+      .catch(() => {
+        this._commentsModel.setComments([]);
+        this._filmDetailsPresenter = new FilmDetailsPresenter(
+          this._commentsModel,
+          this._handleFilmDetailsClose,
+          this._handleViewAction,
+        );
+        this._filmDetailsPresenter.init(film);
+      });
   }
 
   _handleFilmDetailsClose() {
