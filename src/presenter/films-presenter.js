@@ -248,7 +248,7 @@ export default class FilmsPresenter {
         this._filmDetailsPresenter.setViewState(CommentsFormState.SAVING);
         this._api.addComment(update, updatedFilm.id)
           .then(({film, comments}) => {
-            this._commentsModel.addComment(comments);
+            this._commentsModel.setComments(comments);
             return film;
           })
           .then((film) => this._filmsModel.updateFilm(updateType, film))

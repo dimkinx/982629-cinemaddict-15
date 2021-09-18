@@ -28,10 +28,6 @@ export default class CommentsModel extends AbstractObserver {
     this._localComment = LOCAL_COMMENT_DEFAULT;
   }
 
-  addComment(comments) {
-    this._comments = comments;
-  }
-
   deleteComment(commentId) {
     const index = this._comments.findIndex((comment) => comment.id === commentId);
 

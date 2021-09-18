@@ -19,3 +19,5 @@ export const LOADING_TITLE = 'Loading...';
 export const STATISTIC_BAR_HEIGHT = 50;
 
 export const SHAKE_ANIMATION_TIMEOUT = 600;
+
+export const SHAKE_ANIMATION_DURATION = SHAKE_ANIMATION_TIMEOUT / 1000;
