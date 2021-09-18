@@ -42,6 +42,13 @@ export const CommentsFormState = {
   ABORTING: 'ABORTING',
 };
 
+export const ProviderErrorMessage = {
+  GET_COMMENTS: 'Get comments failed',
+  ADD_COMMENT: 'Add comment failed',
+  DELETE_COMMENT: 'Delete comment failed',
+  SYNC: 'Sync data failed',
+};
+
 export const StatisticFilterType = {
   ALL_TIME: {
     name: 'all-time',

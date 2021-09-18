@@ -1,17 +1,23 @@
 import Api from './api/api.js';
+import Store from './api/store';
+import Provider from './api/provider';
+
 import ProfileModel from './model/profile-model';
 import FilterModel from './model/filter-model';
 import FilmsModel from './model/films-model';
 import CommentsModel from './model/comments-model';
+
 import ProfilePresenter from './presenter/profile-presenter';
 import FilterPresenter from './presenter/filter-presenter';
 import FilmsPresenter from './presenter/films-presenter';
+
 import NavigationView from './view/navigation-view';
 import StatisticView from './view/statistic-view';
 import FooterStatisticView from './view/footer-statistic-view';
+
 import {remove, render} from './utils/dom-utils';
 import {RenderPlace, UpdateType} from './types';
-import {END_POINT, AUTHORIZATION} from './const';
+import {END_POINT, AUTHORIZATION, STORE_NAME} from './const';
 
 const headerContainer = document.querySelector('.header');
 const mainContainer = document.querySelector('.main');
@@ -19,6 +25,9 @@ const footerContainer = document.querySelector('.footer');
 const footerStatisticContainer = footerContainer.querySelector('.footer__statistics');
 
 const api = new Api(END_POINT, AUTHORIZATION);
+const store = new Store(STORE_NAME, window.localStorage);
+const apiWithProvider = new Provider(api, store);
+
 const profileModel = new ProfileModel();
 const filterModel = new FilterModel();
 const filmsModel = new FilmsModel();
@@ -29,7 +38,7 @@ const footerStatisticComponent = new FooterStatisticView();
 
 const profilePresenter = new ProfilePresenter(headerContainer, profileModel, filmsModel);
 const filterPresenter = new FilterPresenter(navigationComponent, filterModel, filmsModel);
-const filmsPresenter = new FilmsPresenter(mainContainer, filmsModel, commentsModel, filterModel, api);
+const filmsPresenter = new FilmsPresenter(mainContainer, filmsModel, commentsModel, filterModel, apiWithProvider);
 
 let isPrevTarget = false;
 let statisticComponent = null;
@@ -62,7 +71,7 @@ filterPresenter.init();
 filmsPresenter.init();
 render(footerStatisticContainer, footerStatisticComponent);
 
-api.getFilms()
+apiWithProvider.getFilms()
   .then((films) => filmsModel.setFilms(UpdateType.INIT, films))
   .then(() => {
     remove(footerStatisticComponent);
@@ -72,4 +81,13 @@ api.getFilms()
 
 window.addEventListener('load', () => {
   navigator.serviceWorker.register('/sw.js');
+});
+
+window.addEventListener('online', () => {
+  document.title = document.title.replace(' [offline]', '');
+  apiWithProvider.sync();
+});
+
+window.addEventListener('offline', () => {
+  document.title += ' [offline]';
 });

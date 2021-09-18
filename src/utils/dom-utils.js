@@ -63,8 +63,10 @@ export const remove = (component) => {
   component.removeElement();
 };
 
+export const addActiveModifier = (predicate, className) => predicate ? `${className} ${className}--active`: className;
+
 export const isEscEvent = (evt) => evt.key === 'Escape' || evt.key === 'Esc';
 
-export const isCtrlEnterEvent = (evt) => evt.ctrlKey && evt.key === 'Enter';
+export const isCtrlOrMetaEnterEvent = (evt) => (evt.ctrlKey || evt.metaKey) && (evt.key === 'Enter');
 
-export const addActiveModifier = (predicate, className) => predicate ? `${className} ${className}--active`: className;
+export const isOnline = () => window.navigator.onLine;

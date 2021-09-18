@@ -1,5 +1,5 @@
-import FilmsModel from './model/films-model.js';
-import {EndPoint, Method} from './types';
+import FilmsModel from '../model/films-model.js';
+import {EndPoint, Method} from '../types';
 
 export default class Api {
   constructor(endPoint, authorization) {

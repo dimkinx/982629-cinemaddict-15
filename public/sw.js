@@ -17,6 +17,7 @@ self.addEventListener('install', (evt) => {
         '/fonts/OpenSans-Bold.woff2',
         '/fonts/OpenSans-ExtraBold.woff2',
         '/fonts/OpenSans-Regular.woff2',
+        '/favicon.ico',
         '/images/background.png',
         '/images/bitmap.png',
         '/images/bitmap@2x.png',
