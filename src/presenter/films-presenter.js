@@ -5,10 +5,11 @@ import FilmsExtraView from '../view/films-extra-view';
 import ShowMoreButtonView from '../view/show-more-button-view';
 import FilmPresenter from './film-presenter';
 import FilmDetailsPresenter from './film-details-presenter';
-import {render, remove} from '../utils/dom-utils';
+import {render, remove, isOnline} from '../utils/dom-utils';
 import {applyCamelCase} from '../utils/text-formatting-utils';
-import {RenderPlace, FilterType, SortType, ExtraList, UserAction, UpdateType, CommentsFormState} from '../types';
+import {RenderPlace, FilterType, SortType, ExtraList, UserAction, UpdateType, CommentsFormState, OfflineErrorMessage} from '../types';
 import {FILMS_COUNT_PER_STEP, FILMS_EXTRA_COUNT} from '../const';
+import {toast} from '../utils/toast';
 
 export default class FilmsPresenter {
   constructor(mainContainer, filmsModel, commentsModel, filterModel, api) {
@@ -265,14 +266,32 @@ export default class FilmsPresenter {
             return film;
           })
           .then((film) => this._filmsModel.updateFilm(updateType, film))
-          .catch(() => this._filmDetailsPresenter.setViewState(CommentsFormState.ABORTING));
+          .catch((error) => {
+            this._filmDetailsPresenter.setViewState(CommentsFormState.ABORTING);
+
+            if (!isOnline()) {
+              toast(OfflineErrorMessage.ADD_COMMENT);
+              return;
+            }
+
+            toast(error);
+          });
         break;
       case UserAction.DELETE_COMMENT:
         this._filmDetailsPresenter.setViewState(CommentsFormState.DELETING, update);
         this._api.deleteComment(update)
           .then(() => this._commentsModel.deleteComment(update))
           .then(() => this._filmsModel.updateFilm(updateType, updatedFilm))
-          .catch(() => this._filmDetailsPresenter.setViewState(CommentsFormState.ABORTING, update));
+          .catch((error) => {
+            this._filmDetailsPresenter.setViewState(CommentsFormState.ABORTING, update);
+
+            if (!isOnline()) {
+              toast(OfflineErrorMessage.DELETE_COMMENT);
+              return;
+            }
+
+            toast(error);
+          });
         break;
       case UserAction.UPDATE_LOCAL_COMMENT:
         this._commentsModel.updateLocalComment(update);

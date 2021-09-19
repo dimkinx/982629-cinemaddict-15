@@ -49,6 +49,12 @@ export const ProviderErrorMessage = {
   SYNC: 'Sync data failed',
 };
 
+export const OfflineErrorMessage = {
+  COMMENTS_TITLE: 'Comments aren\'t available offline',
+  ADD_COMMENT: 'You can\'t add comment in offline',
+  DELETE_COMMENT: 'You can\'t delete comment in offline',
+};
+
 export const StatisticFilterType = {
   ALL_TIME: {
     name: 'all-time',
