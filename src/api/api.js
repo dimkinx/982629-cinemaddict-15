@@ -82,7 +82,7 @@ export default class Api {
     return response.json();
   }
 
-  static catchError(err) {
-    throw err;
+  static catchError(error) {
+    throw error;
   }
 }

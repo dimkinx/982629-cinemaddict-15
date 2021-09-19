@@ -1,8 +1,7 @@
 import SmartView from './smart-view';
 import {addActiveModifier, isCtrlOrMetaEnterEvent, isOnline} from '../utils/dom-utils';
 import {convertDateToMs, getCurrentISOStringDate, getFormattedCommentDate, getFormattedDate, getFormattedDuration} from '../utils/date-time-utils';
-import {toast} from '../utils/toast';
-import {UpdateType, UserAction} from '../types';
+import {OfflineErrorMessage, UpdateType, UserAction} from '../types';
 import {LOCAL_COMMENT_DEFAULT} from '../const';
 import he from 'he';
 
@@ -116,7 +115,9 @@ const createFilmDetailsTemplate = ({film, comments, state, formState}) => (
 
       <div class="film-details__bottom-container">
         <section class="film-details__comments-wrap">
-          <h3 class="film-details__comments-title">Comments <span class="film-details__comments-count">${comments.length}</span></h3>
+          <h3 class="film-details__comments-title">
+            ${(isOnline()) ? `Comments <span class="film-details__comments-count">${comments.length}</span>` : OfflineErrorMessage.COMMENTS_TITLE}
+          </h3>
 
           <ul class="film-details__comments-list">
             ${comments.slice().sort((first, second) => (convertDateToMs(first.date) - convertDateToMs(second.date))).map((comment) => createCommentTemplate(comment, formState.isDisabled, formState.deletingCommentId)).join('\n')}
@@ -276,7 +277,10 @@ export default class FilmDetailsView extends SmartView {
     evt.preventDefault();
     this.updateData({state: {...this._data.state, emotion: evt.target.value}});
     this._changeData(UserAction.UPDATE_LOCAL_COMMENT, UpdateType.JUST_UPDATE_DATA, FilmDetailsView.parseDataToLocalComment(this._data));
-    this.getElement().querySelector('.film-details__comment-input').focus();
+
+    const commentInputElement = this.getElement().querySelector('.film-details__comment-input');
+    commentInputElement.focus();
+    commentInputElement.selectionStart = commentInputElement.value.length;
   }
 
   _localCommentInputHandler(evt) {
@@ -290,11 +294,6 @@ export default class FilmDetailsView extends SmartView {
       const localComment = FilmDetailsView.parseDataToLocalComment(this._data);
 
       if (localComment.emotion && localComment.comment) {
-        if (!isOnline()) {
-          toast('You can\'t add comment in offline mode');
-          return;
-        }
-
         this.updateData({state: {...this._data.state, emotion: LOCAL_COMMENT_DEFAULT.emotion, comment: LOCAL_COMMENT_DEFAULT.comment}});
         this._changeData(UserAction.UPDATE_LOCAL_COMMENT, UpdateType.JUST_UPDATE_DATA, FilmDetailsView.parseDataToLocalComment(this._data));
         this._changeData(UserAction.ADD_COMMENT, UpdateType.PATCH, localComment, FilmDetailsView.parseDataToFilm(this._data));
@@ -310,11 +309,6 @@ export default class FilmDetailsView extends SmartView {
     const commentId = evt.target.closest('li').dataset.commentId;
 
     evt.preventDefault();
-    if (!isOnline()) {
-      toast('You can\'t delete comment in offline mode');
-      return;
-    }
-
     this.updateData({state: {...this._data.state, comments: this._data.state.comments.filter((id) => id !== commentId)}}, true);
     this._changeData(UserAction.DELETE_COMMENT, UpdateType.PATCH, commentId, FilmDetailsView.parseDataToFilm(this._data));
   }
