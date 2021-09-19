@@ -1,12 +1,7 @@
 import SmartView from './smart-view';
-import {addActiveModifier, isCtrlEnterEvent} from '../utils/dom-utils';
-import {
-  convertDateToMs,
-  getCurrentISOStringDate,
-  getFormattedCommentDate,
-  getFormattedDate,
-  getFormattedDuration
-} from '../utils/date-time-utils';
+import {addActiveModifier, isCtrlOrMetaEnterEvent, isOnline} from '../utils/dom-utils';
+import {convertDateToMs, getCurrentISOStringDate, getFormattedCommentDate, getFormattedDate, getFormattedDuration} from '../utils/date-time-utils';
+import {toast} from '../utils/toast';
 import {UpdateType, UserAction} from '../types';
 import {LOCAL_COMMENT_DEFAULT} from '../const';
 import he from 'he';
@@ -291,10 +286,15 @@ export default class FilmDetailsView extends SmartView {
   }
 
   _commentAddKeydownHandler(evt) {
-    if (isCtrlEnterEvent(evt)) {
+    if (isCtrlOrMetaEnterEvent(evt)) {
       const localComment = FilmDetailsView.parseDataToLocalComment(this._data);
 
       if (localComment.emotion && localComment.comment) {
+        if (!isOnline()) {
+          toast('You can\'t add comment in offline mode');
+          return;
+        }
+
         this.updateData({state: {...this._data.state, emotion: LOCAL_COMMENT_DEFAULT.emotion, comment: LOCAL_COMMENT_DEFAULT.comment}});
         this._changeData(UserAction.UPDATE_LOCAL_COMMENT, UpdateType.JUST_UPDATE_DATA, FilmDetailsView.parseDataToLocalComment(this._data));
         this._changeData(UserAction.ADD_COMMENT, UpdateType.PATCH, localComment, FilmDetailsView.parseDataToFilm(this._data));
@@ -310,6 +310,11 @@ export default class FilmDetailsView extends SmartView {
     const commentId = evt.target.closest('li').dataset.commentId;
 
     evt.preventDefault();
+    if (!isOnline()) {
+      toast('You can\'t delete comment in offline mode');
+      return;
+    }
+
     this.updateData({state: {...this._data.state, comments: this._data.state.comments.filter((id) => id !== commentId)}}, true);
     this._changeData(UserAction.DELETE_COMMENT, UpdateType.PATCH, commentId, FilmDetailsView.parseDataToFilm(this._data));
   }
